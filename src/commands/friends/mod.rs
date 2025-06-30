@@ -12,8 +12,34 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
     let api_config = auth_client.api_config();
 
     match action {
-        FriendsAction::List { offline, online, limit, offset: _, all, human_readable, help: _ } => {
-            handlers::handle_list_action(api_config, offline, online, limit, all, human_readable).await
+        FriendsAction::List { 
+            offline, 
+            online, 
+            limit, 
+            offset: _, 
+            long,
+            show_id,
+            show_status,
+            show_platform,
+            show_location,
+            show_activity,
+            human_readable, 
+            all,
+            help: _ 
+        } => {
+            handlers::handle_list_action(
+                api_config, 
+                offline, 
+                online, 
+                limit, 
+                long || all, // Backward compatibility: -a maps to -l
+                show_id,
+                show_status || all, // -a shows status by default
+                show_platform || all, // -a shows platform by default
+                show_location || all, // -a shows location by default
+                show_activity || all, // -a shows activity by default
+                human_readable
+            ).await
         }
         FriendsAction::Get { username } => {
             handlers::handle_get_action(api_config, &username).await

@@ -39,17 +39,35 @@ enum FriendsAction {
         #[arg(long, conflicts_with = "offline")]
         online: bool,
         /// Number of friends to fetch
-        #[arg(short, long)]
+        #[arg(short = 'n', long)]
         limit: Option<i32>,
         /// Offset for pagination
         #[arg(short, long)]
         offset: Option<i32>,
-        /// Show additional details (status, platform, etc.)
-        #[arg(short = 'a', long)]
-        all: bool,
+        /// Long format (detailed view)
+        #[arg(short = 'l', long)]
+        long: bool,
+        /// Show user IDs
+        #[arg(long)]
+        show_id: bool,
+        /// Show user status
+        #[arg(long)]
+        show_status: bool,
+        /// Show platform information
+        #[arg(long)]
+        show_platform: bool,
+        /// Show location information
+        #[arg(long)]
+        show_location: bool,
+        /// Show last activity
+        #[arg(long)]
+        show_activity: bool,
         /// Use human-readable format with emoji icons
         #[arg(short = 'h', long)]
         human_readable: bool,
+        /// Show additional details (status, platform, etc.) [DEPRECATED: use -l instead]
+        #[arg(short = 'a', long, hide = true)]
+        all: bool,
         /// Print help
         #[arg(long, action = clap::ArgAction::Help)]
         help: (),

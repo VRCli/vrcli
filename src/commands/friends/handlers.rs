@@ -8,8 +8,13 @@ pub async fn handle_list_action(
     offline: bool,
     online: bool,
     limit: Option<i32>,
-    all: bool,
-    human_readable: bool,
+    long_format: bool,
+    show_id: bool,
+    show_status: bool,
+    show_platform: bool,
+    show_location: bool,
+    show_activity: bool,
+    _human_readable: bool, // Not used in tabular format
 ) -> Result<()> {
     let all_friends = if offline {
         // Fetch offline friends only using parallel processing
@@ -21,15 +26,14 @@ pub async fn handle_list_action(
         // Fetch ALL friends: both online and offline in parallel
         fetcher::fetch_all_friends_parallel(api_config, limit).await?
     };
-    
-    if all_friends.is_empty() {
+      if all_friends.is_empty() {
         println!("No friends found.");
         return Ok(());
     }
-    
-    // Simple list mode (no options)
-    if !all {
-        // Display all friends
+
+    // Simple list mode (no detailed options)
+    if !long_format && !show_id && !show_status && !show_platform && !show_location && !show_activity {
+        // Display only display names
         for friend in &all_friends {
             if !friend.display_name.is_empty() {
                 println!("{}", friend.display_name);
@@ -37,25 +41,45 @@ pub async fn handle_list_action(
         }
         return Ok(());
     }
+
+    // Tabular format mode (netstat style)
+    // Print header
+    println!("Name\t\t\tStatus\t\tPlatform\tLocation\t\tLast-Activity");
     
-    // Detailed list mode (-a option)
-    println!("Friends ({}):", all_friends.len());
     for friend in all_friends {
-        println!("  {} ({})", friend.display_name, friend.id);
-        
-        // Show status based on human_readable flag
-        if human_readable {
-            println!("    {}", formatter::format_user_status_human(&friend.status));
+        let name = if friend.display_name.len() > 20 {
+            format!("{}...", &friend.display_name[..17])
         } else {
-            println!("    {}", formatter::format_user_status_plain(&friend.status));
-        }
+            friend.display_name.clone()
+        };
         
-        println!("    Platform: {} | Location: {}", friend.platform, friend.location);
+        let status = if show_status || long_format {
+            formatter::format_user_status_short(&friend.status)
+        } else {
+            "-".to_string()
+        };
         
-        // Show last activity if available
-        if let Some(last_activity) = &friend.last_activity {
-            println!("    Last activity: {}", last_activity);
-        }
+        let platform = if show_platform || long_format {
+            friend.platform.clone()
+        } else {
+            "-".to_string()
+        };
+        
+        let location = if show_location || long_format {
+            formatter::format_location_short(&friend.location)
+        } else {
+            "-".to_string()
+        };
+        
+        let activity = if show_activity || long_format {
+            formatter::format_activity_time(&friend.last_activity)
+        } else {
+            "-".to_string()
+        };
+        
+        // Print with tab formatting
+        println!("{:<23}\t{:<12}\t{:<12}\t{:<16}\t{}", 
+                 name, status, platform, location, activity);
     }
     
     Ok(())
