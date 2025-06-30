@@ -1,7 +1,5 @@
 mod fetcher;
-mod formatter;
 mod handlers;
-mod handlers_v2;
 mod sorting;
 mod utils;
 mod table_adapter;
@@ -9,6 +7,7 @@ mod table_adapter;
 use crate::auth_client::AuthenticatedClient;
 use crate::FriendsAction;
 use anyhow::Result;
+use handlers::{ListDisplayOptions, ListFilterOptions};
 
 pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
     let auth_client = AuthenticatedClient::new().await?;
@@ -32,21 +31,25 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
             all,
             help: _ 
         } => {
-            handlers::handle_list_action(
-                api_config, 
-                offline, 
-                online, 
-                limit, 
-                long || all, // Backward compatibility: -a maps to -l
+            let filter_options = ListFilterOptions {
+                offline,
+                online,
+                limit,
+                sort_method: sort,
+                reverse,
+            };
+            
+            let display_options = ListDisplayOptions {
+                long_format: long || all, // Backward compatibility: -a maps to -l
                 show_id,
-                show_status || all, // -a shows status by default
-                show_platform || all, // -a shows platform by default
-                show_location || all, // -a shows location by default
-                show_activity || all, // -a shows activity by default
+                show_status: show_status || all, // -a shows status by default
+                show_platform: show_platform || all, // -a shows platform by default
+                show_location: show_location || all, // -a shows location by default
+                show_activity: show_activity || all, // -a shows activity by default
                 json,
-                &sort,
-                reverse
-            ).await
+            };
+
+            handlers::handle_list_action(api_config, filter_options, display_options).await
         }
         FriendsAction::Get { username } => {
             handlers::handle_get_action(api_config, &username).await

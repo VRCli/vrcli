@@ -15,8 +15,10 @@ impl AuthenticatedClient {
     /// Create and authenticate a new client based on saved config
     pub async fn new() -> Result<Self> {
         let app_config = Config::load()?;
-        let mut api_config = apis::configuration::Configuration::default();
-        api_config.user_agent = Some(String::from("vrcli/0.1.0"));
+        let mut api_config = apis::configuration::Configuration {
+            user_agent: Some(String::from("vrcli/0.1.0")),
+            ..Default::default()
+        };
 
         // Set authentication based on config
         Self::configure_auth(&mut api_config, &app_config.auth_method)?;
@@ -33,11 +35,6 @@ impl AuthenticatedClient {
     /// Get the API configuration for making requests
     pub fn api_config(&self) -> &apis::configuration::Configuration {
         &self.config
-    }
-
-    /// Get the current authenticated user
-    pub fn current_user(&self) -> Option<&vrchatapi::models::CurrentUser> {
-        self.current_user.as_ref()
     }
 
     /// Configure authentication settings on the API config
@@ -100,16 +97,13 @@ impl AuthenticatedClient {
     }
 
     /// Display authentication status
-    pub fn display_auth_status(&self, auth_method: &AuthMethod) {
+    pub fn display_auth_status(&self) {
         if let Some(user) = &self.current_user {
-            match auth_method {
-                AuthMethod::Cookie { .. } => {
-                    println!("✅ Authenticated with cookies as: {} ({})", user.display_name, user.id);
-                }
-                AuthMethod::Password { .. } => {
-                    println!("✅ Authenticated with password as: {} ({})", user.display_name, user.id);
-                }
-            }
+            println!("✅ Authentication Status: Active");
+            println!("📱 User ID: {}", user.id);
+            println!("👤 Display Name: {}", user.display_name);
+        } else {
+            println!("❌ Authentication Status: Not authenticated");
         }
     }
 }

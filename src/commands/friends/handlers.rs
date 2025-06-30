@@ -3,35 +3,47 @@ use vrchatapi::apis;
 use crate::common::{formatter::GenericFormatter, output_options::OutputOptions};
 use super::{fetcher, sorting, table_adapter::FriendTableItem};
 
+/// Configuration for list action display options
+#[derive(Debug, Clone)]
+pub struct ListDisplayOptions {
+    pub long_format: bool,
+    pub show_id: bool,
+    pub show_status: bool,
+    pub show_platform: bool,
+    pub show_location: bool,
+    pub show_activity: bool,
+    pub json: bool,
+}
+
+/// Configuration for list action filter and sort options
+#[derive(Debug, Clone)]
+pub struct ListFilterOptions {
+    pub offline: bool,
+    pub online: bool,
+    pub limit: Option<i32>,
+    pub sort_method: String,
+    pub reverse: bool,
+}
+
 /// Handle the List action
 pub async fn handle_list_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
-    offline: bool,
-    online: bool,
-    limit: Option<i32>,
-    long_format: bool,
-    show_id: bool,
-    show_status: bool,
-    show_platform: bool,
-    show_location: bool,
-    show_activity: bool,
-    json: bool, // JSON output format instead of human-readable
-    sort_method: &str,
-    reverse: bool,
+    filter_options: ListFilterOptions,
+    display_options: ListDisplayOptions,
 ) -> Result<()> {
-    let mut all_friends = if offline {
+    let mut all_friends = if filter_options.offline {
         // Fetch offline friends only using parallel processing
-        fetcher::fetch_pages_parallel(api_config, Some(true), limit).await?
-    } else if online {
+        fetcher::fetch_pages_parallel(api_config, Some(true), filter_options.limit).await?
+    } else if filter_options.online {
         // Fetch online friends only using parallel processing
-        fetcher::fetch_pages_parallel(api_config, Some(false), limit).await?
+        fetcher::fetch_pages_parallel(api_config, Some(false), filter_options.limit).await?
     } else {
         // Fetch ALL friends: both online and offline in parallel
-        fetcher::fetch_all_friends_parallel(api_config, limit).await?
+        fetcher::fetch_all_friends_parallel(api_config, filter_options.limit).await?
     };
 
     if all_friends.is_empty() {
-        if json {
+        if display_options.json {
             println!("[]");
         } else {
             println!("No friends found.");
@@ -40,62 +52,33 @@ pub async fn handle_list_action(
     }
 
     // Apply sorting
-    if let Some(sort_method_enum) = sorting::SortMethod::from_str(sort_method) {
-        sorting::sort_friends(&mut all_friends, sort_method_enum, reverse);
+    if let Some(sort_method_enum) = sorting::SortMethod::from_str(&filter_options.sort_method) {
+        sorting::sort_friends(&mut all_friends, sort_method_enum, filter_options.reverse);
     } else {
-        eprintln!("Warning: Unknown sort method '{}'. Using default 'name' sorting.", sort_method);
+        eprintln!("Warning: Unknown sort method '{}'. Using default 'name' sorting.", filter_options.sort_method);
         eprintln!("Available methods: {}", sorting::SortMethod::all_methods().join(", "));
-        sorting::sort_friends(&mut all_friends, sorting::SortMethod::Name, reverse);
+        sorting::sort_friends(&mut all_friends, sorting::SortMethod::Name, filter_options.reverse);
     }
 
-    // JSON output mode
-    if json {
-        let table_items: Vec<FriendTableItem> = all_friends
-            .iter()
-            .map(FriendTableItem::new)
-            .collect();
-
-        let output_options = OutputOptions {
-            json: true,
-            long_format: true,
-            show_id: show_id || long_format,
-            show_status: show_status || long_format,
-            show_platform: show_platform || long_format,
-            show_location: show_location || long_format,
-            show_activity: show_activity || long_format,
-        };
-
-        return GenericFormatter::format_json(&table_items, &output_options);
-    }
-
-    // Simple list mode (no detailed options)
-    if !long_format && !show_id && !show_status && !show_platform && !show_location && !show_activity {
-        // Display only display names
-        for friend in &all_friends {
-            if !friend.display_name.is_empty() {
-                println!("{}", friend.display_name);
-            }
-        }
-        return Ok(());
-    }
-
-    // Tabular format mode with new framework
+    // Convert to table items
     let table_items: Vec<FriendTableItem> = all_friends
         .iter()
         .map(FriendTableItem::new)
         .collect();
 
+    // Create output options
     let output_options = OutputOptions {
-        json: false,
-        long_format: true,
-        show_id: show_id || long_format,
-        show_status: show_status || long_format,
-        show_platform: show_platform || long_format,
-        show_location: show_location || long_format,
-        show_activity: show_activity || long_format,
+        json: display_options.json,
+        long_format: display_options.long_format,
+        show_id: display_options.show_id || display_options.long_format,
+        show_status: display_options.show_status || display_options.long_format,
+        show_platform: display_options.show_platform || display_options.long_format,
+        show_location: display_options.show_location || display_options.long_format,
+        show_activity: display_options.show_activity || display_options.long_format,
     };
 
-    GenericFormatter::format_table(&table_items, &output_options)
+    // Use generic formatter
+    GenericFormatter::format(&table_items, &output_options)
 }
 
 /// Handle the Get action

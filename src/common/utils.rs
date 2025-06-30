@@ -36,7 +36,7 @@ pub fn format_platform_short(platform: &str) -> String {
                  || platform.starts_with("2021.") || platform.starts_with("2022.") 
                  || platform.starts_with("2023.") || platform.starts_with("2024.") => {
             // Unity version strings - extract year and show as "Unity YYYY"
-            if let Some(year) = platform.chars().take(4).collect::<String>().parse::<u16>().ok() {
+            if let Ok(year) = platform.chars().take(4).collect::<String>().parse::<u16>() {
                 format!("Unity{}", year)
             } else {
                 "Unity".to_string()
@@ -52,21 +52,6 @@ pub fn format_platform_short(platform: &str) -> String {
                 platform.to_string()
             }
         }
-    }
-}
-
-/// Format timestamp for display
-pub fn format_activity_time(activity: &Option<String>) -> String {
-    match activity {
-        Some(time_str) => {
-            // If it's already in a readable format, use it
-            if time_str.contains('T') {
-                time_str.clone()
-            } else {
-                time_str.clone()
-            }
-        }
-        None => "-".to_string(),
     }
 }
 

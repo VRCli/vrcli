@@ -10,43 +10,5 @@ pub struct OutputOptions {
     pub show_activity: bool,
 }
 
-impl OutputOptions {
-    /// Create minimal output options (just names/titles)
-    pub fn minimal() -> Self {
-        Self {
-            json: false,
-            long_format: false,
-            show_id: false,
-            show_status: false,
-            show_platform: false,
-            show_location: false,
-            show_activity: false,
-        }
-    }
-
-    /// Create detailed output options (all fields)
-    pub fn detailed() -> Self {
-        Self {
-            json: false,
-            long_format: true,
-            show_id: true,
-            show_status: true,
-            show_platform: true,
-            show_location: true,
-            show_activity: true,
-        }
-    }
-
-    /// Create options for JSON output
-    pub fn json() -> Self {
-        Self {
-            json: true,
-            long_format: true,
-            show_id: true,
-            show_status: true,
-            show_platform: true,
-            show_location: true,
-            show_activity: true,
-        }
-    }
-}
+// Note: Constructor methods (minimal, detailed, json) were removed as they were unused.
+// Output options are now constructed directly where needed.

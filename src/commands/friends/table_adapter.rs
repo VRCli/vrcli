@@ -11,7 +11,7 @@ impl<'a> FriendTableItem<'a> {
     }
 }
 
-impl<'a> TableDisplayable for FriendTableItem<'a> {
+impl TableDisplayable for FriendTableItem<'_> {
     fn display_name(&self) -> &str {
         &self.friend.display_name
     }

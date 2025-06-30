@@ -31,7 +31,7 @@ impl SortMethod {
 
 /// Sort friends list according to the specified method
 pub fn sort_friends(
-    friends: &mut Vec<vrchatapi::models::LimitedUserFriend>,
+    friends: &mut [vrchatapi::models::LimitedUserFriend],
     method: SortMethod,
     reverse: bool,
 ) {

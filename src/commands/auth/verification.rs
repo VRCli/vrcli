@@ -1,3 +1,6 @@
+// Authentication verification utilities
+// Currently unused but kept for future auth status command implementation
+
 use crate::config::{Config, AuthMethod};
 use anyhow::Result;
 use reqwest::cookie::CookieStore;
@@ -9,6 +12,7 @@ use vrchatapi::apis;
 use vrchatapi::models::EitherUserOrTwoFactor;
 
 /// Verify current authentication status
+#[allow(dead_code)]
 pub async fn verify_current_auth(config: &Config) -> Result<String> {
     match &config.auth_method {
         AuthMethod::Password { username, password } => {
@@ -21,10 +25,13 @@ pub async fn verify_current_auth(config: &Config) -> Result<String> {
 }
 
 /// Verify password-based authentication
+#[allow(dead_code)]
 async fn verify_password_auth(username: &str, password: &str) -> Result<String> {
-    let mut api_config = apis::configuration::Configuration::default();
-    api_config.basic_auth = Some((username.to_string(), Some(password.to_string())));
-    api_config.user_agent = Some(String::from("vrcli/0.1.0"));
+    let api_config = apis::configuration::Configuration {
+        basic_auth: Some((username.to_string(), Some(password.to_string()))),
+        user_agent: Some(String::from("vrcli/0.1.0")),
+        ..Default::default()
+    };
     
     match apis::authentication_api::get_current_user(&api_config).await? {
         EitherUserOrTwoFactor::CurrentUser(user) => Ok(user.display_name),
@@ -33,6 +40,7 @@ async fn verify_password_auth(username: &str, password: &str) -> Result<String> 
 }
 
 /// Verify cookie-based authentication
+#[allow(dead_code)]
 async fn verify_cookie_auth(auth_cookie: &str, two_fa_cookie: Option<&str>) -> Result<String> {
     let jar = Arc::new(reqwest::cookie::Jar::default());
     let cookie_header = if let Some(tfa) = two_fa_cookie {
@@ -52,9 +60,11 @@ async fn verify_cookie_auth(auth_cookie: &str, two_fa_cookie: Option<&str>) -> R
         .build()
         .unwrap();
 
-    let mut api_config = apis::configuration::Configuration::default();
-    api_config.client = client;
-    api_config.user_agent = Some(String::from("vrcli/0.1.0"));
+    let api_config = apis::configuration::Configuration {
+        client,
+        user_agent: Some(String::from("vrcli/0.1.0")),
+        ..Default::default()
+    };
     
     match apis::authentication_api::get_current_user(&api_config).await? {
         EitherUserOrTwoFactor::CurrentUser(user) => Ok(user.display_name),

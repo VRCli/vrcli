@@ -41,9 +41,11 @@ pub async fn login_with_password() -> Result<()> {
     println!("Verifying credentials...");
 
     // Create API configuration for VRChat authentication
-    let mut config = apis::configuration::Configuration::default();
-    config.basic_auth = Some((username.clone(), Some(password.clone())));
-    config.user_agent = Some(String::from("vrcli/0.1.0"));
+    let config = apis::configuration::Configuration {
+        basic_auth: Some((username.clone(), Some(password.clone()))),
+        user_agent: Some(String::from("vrcli/0.1.0")),
+        ..Default::default()
+    };
 
     match apis::authentication_api::get_current_user(&config).await {
         Ok(response) => {
@@ -113,9 +115,11 @@ pub async fn login_with_cookie() -> Result<()> {
         .build()
         .unwrap();
 
-    let mut config = apis::configuration::Configuration::default();
-    config.client = client;
-    config.user_agent = Some(String::from("vrcli/0.1.0"));
+    let config = apis::configuration::Configuration {
+        client,
+        user_agent: Some(String::from("vrcli/0.1.0")),
+        ..Default::default()
+    };
 
     // Attempt cookie authentication
     match apis::authentication_api::get_current_user(&config).await {

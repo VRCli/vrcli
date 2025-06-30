@@ -1,5 +1,4 @@
-use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
-use colored::*;
+use unicode_width::UnicodeWidthStr;
 use serde_json::{Map, Value};
 
 /// Generic trait for items that can be displayed in a table format
@@ -181,13 +180,13 @@ pub fn format_table<T: TableDisplayable>(
         let mut row = String::new();
         
         // Name column
-        let name = format_text_with_width(item.display_name(), widths.name);
+        let name = crate::common::utils::format_text_with_width(item.display_name(), widths.name);
         row.push_str(&name);
         
         // ID column
         if options.show_id {
             if let Some(id) = item.id() {
-                let formatted_id = format_text_with_width(id, widths.id);
+                let formatted_id = crate::common::utils::format_text_with_width(id, widths.id);
                 row.push_str(&formatted_id);
             } else {
                 row.push_str(&format!("{:<width$}", "", width = widths.id));
@@ -207,7 +206,7 @@ pub fn format_table<T: TableDisplayable>(
         // Platform column
         if options.show_platform {
             if let Some(formatted_platform) = item.formatted_platform() {
-                let platform_formatted = format_text_with_width(&formatted_platform, widths.platform);
+                let platform_formatted = crate::common::utils::format_text_with_width(&formatted_platform, widths.platform);
                 row.push_str(&platform_formatted);
             } else {
                 row.push_str(&format!("{:<width$}", "", width = widths.platform));
@@ -217,7 +216,7 @@ pub fn format_table<T: TableDisplayable>(
         // Location column
         if options.show_location {
             if let Some(location) = item.location() {
-                let formatted_location = format_text_with_width(location, widths.location);
+                let formatted_location = crate::common::utils::format_text_with_width(location, widths.location);
                 row.push_str(&formatted_location);
             } else {
                 row.push_str(&format!("{:<width$}", "", width = widths.location));
@@ -236,43 +235,6 @@ pub fn format_table<T: TableDisplayable>(
     }
     
     output
-}
-
-/// Helper function to format text with specified width, handling Unicode properly
-pub fn format_text_with_width(text: &str, width: usize) -> String {
-    let display_width = text.width();
-    
-    if display_width <= width {
-        // Pad with spaces to exact width
-        let padding = width - display_width;
-        format!("{}{}", text, " ".repeat(padding))
-    } else {
-        // Need to truncate
-        let mut truncated = String::new();
-        let mut current_width = 0;
-        let available_width = width.saturating_sub(3); // Reserve space for "..."
-        
-        for ch in text.chars() {
-            let char_width = ch.width().unwrap_or(0);
-            if current_width + char_width <= available_width {
-                truncated.push(ch);
-                current_width += char_width;
-            } else {
-                break;
-            }
-        }
-        
-        // Add ellipsis and pad to exact width
-        let result = format!("{}...", truncated);
-        let result_width = result.width();
-        
-        if result_width < width {
-            let padding = width - result_width;
-            format!("{}{}", result, " ".repeat(padding))
-        } else {
-            result
-        }
-    }
 }
 
 /// Helper function to format colored text with specified width
