@@ -42,44 +42,82 @@ pub async fn handle_list_action(
         return Ok(());
     }
 
-    // Tabular format mode (netstat style)
-    // Print header
-    println!("Name\t\t\tStatus\t\tPlatform\tLocation\t\tLast-Activity");
+    // Tabular format mode with fixed-width columns
+    // Determine which columns to show
+    let show_name = true; // Always show name
+    let show_status_col = show_status || long_format;
+    let show_platform_col = show_platform || long_format;
+    let show_location_col = show_location || long_format;
+    let show_activity_col = show_activity || long_format;
+    let show_id_col = show_id || long_format;
     
+    // Define column widths for proper alignment
+    const NAME_WIDTH: usize = 20;
+    const ID_WIDTH: usize = 32;
+    const STATUS_WIDTH: usize = 10;
+    const PLATFORM_WIDTH: usize = 12;
+    const LOCATION_WIDTH: usize = 18;
+    const ACTIVITY_WIDTH: usize = 20;
+    
+    // Build and print header with proper spacing
+    let mut header_line = String::new();
+    if show_name {
+        header_line.push_str(&format!("{:<width$}", "Name", width = NAME_WIDTH));
+    }
+    if show_id_col {
+        header_line.push_str(&format!("{:<width$}", "ID", width = ID_WIDTH));
+    }
+    if show_status_col {
+        header_line.push_str(&format!("{:<width$}", "Status", width = STATUS_WIDTH));
+    }
+    if show_platform_col {
+        header_line.push_str(&format!("{:<width$}", "Platform", width = PLATFORM_WIDTH));
+    }
+    if show_location_col {
+        header_line.push_str(&format!("{:<width$}", "Location", width = LOCATION_WIDTH));
+    }
+    if show_activity_col {
+        header_line.push_str("Last-Activity");
+    }
+    println!("{}", header_line);
+    
+    // Print data rows with proper column alignment
     for friend in all_friends {
-        let name = if friend.display_name.len() > 20 {
-            format!("{}...", &friend.display_name[..17])
-        } else {
-            friend.display_name.clone()
-        };
+        let mut row_line = String::new();
         
-        let status = if show_status || long_format {
-            formatter::format_user_status_short(&friend.status)
-        } else {
-            "-".to_string()
-        };
+        if show_name {
+            let name = formatter::format_display_name_fixed(&friend.display_name, NAME_WIDTH);
+            row_line.push_str(&name);
+        }
         
-        let platform = if show_platform || long_format {
-            friend.platform.clone()
-        } else {
-            "-".to_string()
-        };
+        if show_id_col {
+            let id = formatter::format_id_fixed(&friend.id, ID_WIDTH);
+            row_line.push_str(&id);
+        }
         
-        let location = if show_location || long_format {
-            formatter::format_location_short(&friend.location)
-        } else {
-            "-".to_string()
-        };
+        if show_status_col {
+            let status = formatter::format_user_status_short(&friend.status);
+            let status_fixed = &format!("{:<width$}", status, width = STATUS_WIDTH);
+            row_line.push_str(status_fixed);
+        }
         
-        let activity = if show_activity || long_format {
-            formatter::format_activity_time(&friend.last_activity)
-        } else {
-            "-".to_string()
-        };
+        if show_platform_col {
+            let platform = formatter::format_platform_fixed(&friend.platform, PLATFORM_WIDTH);
+            row_line.push_str(&platform);
+        }
         
-        // Print with tab formatting
-        println!("{:<23}\t{:<12}\t{:<12}\t{:<16}\t{}", 
-                 name, status, platform, location, activity);
+        if show_location_col {
+            let location = formatter::format_location_fixed(&friend.location, LOCATION_WIDTH);
+            row_line.push_str(&location);
+        }
+        
+        if show_activity_col {
+            let activity = formatter::format_activity_time(&friend.last_activity);
+            row_line.push_str(&activity);
+        }
+        
+        // Print row with proper column alignment
+        println!("{}", row_line);
     }
     
     Ok(())
