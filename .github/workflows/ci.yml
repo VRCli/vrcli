@@ -43,8 +43,34 @@ jobs:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
     
-    - name: Check formatting
-      run: cargo fmt --all -- --check
+    - name: Auto-format code
+      run: cargo fmt --all
+    
+    - name: Check if formatting changed anything
+      id: verify-formatting
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "needs_formatting=true" >> $GITHUB_OUTPUT
+          echo "Code was auto-formatted"
+        else
+          echo "needs_formatting=false" >> $GITHUB_OUTPUT
+          echo "Code is already properly formatted"
+        fi
+    
+    - name: Commit formatting changes
+      if: steps.verify-formatting.outputs.needs_formatting == 'true' && github.event_name == 'pull_request'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "auto: format code with cargo fmt"
+        git push
+    
+    - name: Fail if formatting is needed on main/develop
+      if: steps.verify-formatting.outputs.needs_formatting == 'true' && github.event_name == 'push'
+      run: |
+        echo "Code formatting is required. Please run 'cargo fmt --all' and commit the changes."
+        exit 1
     
     - name: Run clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
