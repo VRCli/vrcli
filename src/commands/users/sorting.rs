@@ -19,7 +19,38 @@ impl From<&str> for UserSortMethod {
 }
 
 /// Sort users by the specified method
-pub fn sort_users<T>(users: &mut Vec<T>, sort_method: UserSortMethod, reverse: bool) {
-    // TODO: Implement user sorting logic
-    // This will depend on the actual user data structure we're working with
+#[allow(dead_code)]
+pub fn sort_users(users: &mut [crate::commands::users::table_adapter::UserTableItem], sort_method: UserSortMethod, reverse: bool) {
+    users.sort_by(|a, b| {
+        let ordering = match sort_method {
+            UserSortMethod::Name => a.display_name.cmp(&b.display_name),
+            UserSortMethod::Id => a.id.cmp(&b.id),
+            UserSortMethod::LastActivity => {
+                // Compare last activity strings directly
+                // "N/A" should be sorted to the end
+                match (a.last_activity.as_str(), b.last_activity.as_str()) {
+                    ("N/A", "N/A") => std::cmp::Ordering::Equal,
+                    ("N/A", _) => std::cmp::Ordering::Greater,
+                    (_, "N/A") => std::cmp::Ordering::Less,
+                    (a_act, b_act) => a_act.cmp(b_act),
+                }
+            },
+            UserSortMethod::DateJoined => {
+                // Compare date joined strings directly
+                // "N/A" should be sorted to the end
+                match (a.date_joined.as_str(), b.date_joined.as_str()) {
+                    ("N/A", "N/A") => std::cmp::Ordering::Equal,
+                    ("N/A", _) => std::cmp::Ordering::Greater,
+                    (_, "N/A") => std::cmp::Ordering::Less,
+                    (a_date, b_date) => a_date.cmp(b_date),
+                }
+            },
+        };
+
+        if reverse {
+            ordering.reverse()
+        } else {
+            ordering
+        }
+    });
 }

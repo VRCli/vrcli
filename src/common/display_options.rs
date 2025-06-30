@@ -11,45 +11,6 @@ pub struct DisplayOptions {
 }
 
 impl DisplayOptions {
-    /// Create minimal display options (name only)
-    pub fn minimal() -> Self {
-        Self {
-            long_format: false,
-            show_id: false,
-            show_status: false,
-            show_platform: false,
-            show_location: false,
-            show_activity: false,
-            json: false,
-        }
-    }
-
-    /// Create detailed display options (all fields)
-    pub fn detailed() -> Self {
-        Self {
-            long_format: true,
-            show_id: true,
-            show_status: true,
-            show_platform: true,
-            show_location: true,
-            show_activity: true,
-            json: false,
-        }
-    }
-
-    /// Create JSON output options
-    pub fn json() -> Self {
-        Self {
-            long_format: false,
-            show_id: true,
-            show_status: true,
-            show_platform: true,
-            show_location: true,
-            show_activity: true,
-            json: true,
-        }
-    }
-
     /// Convert to OutputOptions for backwards compatibility
     pub fn to_output_options(&self) -> super::output_options::OutputOptions {
         super::output_options::OutputOptions {

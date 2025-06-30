@@ -25,33 +25,3 @@ pub fn display_results<T: TableDisplayable>(
     let output_options = display_options.to_output_options();
     GenericFormatter::format(items, &output_options)
 }
-
-/// Common user identifier resolution types and utilities
-#[derive(Debug, Clone)]
-pub struct UserIdentifier {
-    pub value: String,
-    pub force_as_id: bool,
-}
-
-impl UserIdentifier {
-    pub fn new(value: String, force_as_id: bool) -> Self {
-        Self { value, force_as_id }
-    }
-
-    /// Check if this identifier should be treated as a user ID
-    pub fn is_user_id(&self) -> bool {
-        self.force_as_id || crate::common::utils::is_valid_user_id(&self.value)
-    }
-
-    /// Resolve this identifier to a user ID
-    pub async fn resolve_to_user_id(
-        &self,
-        api_config: &vrchatapi::apis::configuration::Configuration,
-    ) -> Result<String> {
-        if self.is_user_id() {
-            Ok(self.value.clone())
-        } else {
-            crate::common::utils::resolve_display_name_to_user_id(api_config, &self.value).await
-        }
-    }
-}

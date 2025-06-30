@@ -123,12 +123,10 @@ pub async fn handle_note_get_action(
         } else {
             println!("Note for user {}: {}", identifier, note.note);
         }
+    } else if display_options.json {
+        println!("null");
     } else {
-        if display_options.json {
-            println!("null");
-        } else {
-            println!("No note found for user: {}", identifier);
-        }
+        println!("No note found for user: {}", identifier);
     }
 
     Ok(())

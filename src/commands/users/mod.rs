@@ -36,7 +36,7 @@ pub async fn handle_users_command(action: UsersAction) -> Result<()> {
                 long,   // show_status - show when long format is enabled
                 long,   // show_platform - show when long format is enabled
                 false,  // show_location - not available in search results
-                long,   // show_activity - show when long format is enabled
+                false,  // show_activity - always N/A in search results
                 json,   // json
             );
 
