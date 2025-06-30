@@ -9,7 +9,7 @@ pub fn handle_empty_results(display_options: &DisplayOptions, context_message: &
     if display_options.json {
         println!("[]");
     } else {
-        println!("{}", context_message);
+        println!("{context_message}");
     }
     Ok(())
 }

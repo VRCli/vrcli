@@ -266,7 +266,8 @@ fn format_colored_text_with_width(colored_text: &str, plain_text: &str, width: u
 
     if display_width <= width {
         let padding = width - display_width;
-        format!("{}{}", colored_text, " ".repeat(padding))
+        let spaces = " ".repeat(padding);
+        format!("{colored_text}{spaces}")
     } else {
         // For colored text that's too long, we need to truncate the plain text
         // and apply the same truncation logic, but this is complex for colored text

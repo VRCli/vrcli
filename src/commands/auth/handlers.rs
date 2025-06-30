@@ -27,20 +27,20 @@ async fn handle_status_action() -> Result<()> {
                     client.display_auth_status();
                 }
                 Err(e) => {
-                    let error_msg = format!("{}", e);
+                    let error_msg = format!("{e}");
                     if error_msg.contains("Cookie authentication failed")
                         || error_msg.contains("Password authentication failed")
                     {
-                        println!("❌ Authentication failed: {}", e);
+                        println!("❌ Authentication failed: {e}");
                         println!("Please run 'vrcli auth login' to refresh your authentication");
                     } else {
-                        println!("❌ Error checking authentication status: {}", e);
+                        println!("❌ Error checking authentication status: {e}");
                     }
                 }
             }
         }
         Err(e) => {
-            println!("❌ Not authenticated: {}", e);
+            println!("❌ Not authenticated: {e}");
             println!("Please run 'vrcli auth login' to authenticate");
         }
     }

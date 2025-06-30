@@ -33,18 +33,18 @@ fn display_single_user(
     }
 
     if let Some(username) = &user.username {
-        println!("Username: {}", username);
+        println!("Username: {username}");
     }
 
     if options.show_status {
         // Use colored status for better visibility
         let colored_status = crate::common::utils::format_user_status(&user.status_enum, true);
-        println!("Status: {}", colored_status);
+        println!("Status: {colored_status}");
     }
 
     if options.show_platform {
         let formatted_platform = crate::common::utils::format_platform_short(&user.platform);
-        println!("Platform: {}", formatted_platform);
+        println!("Platform: {formatted_platform}");
     }
 
     if options.show_activity {
@@ -87,7 +87,7 @@ pub async fn handle_search_action(
     display_results(
         &user_items,
         &display_options,
-        &format!("No users found for query: {}", search_options.query),
+        &format!("No users found for query: {query}", query = search_options.query),
     )
 }
 
@@ -184,7 +184,7 @@ pub async fn handle_note_get_action(
     } else if display_options.json {
         println!("null");
     } else {
-        println!("No note found for user: {}", identifier);
+        println!("No note found for user: {identifier}");
     }
 
     Ok(())
@@ -282,7 +282,7 @@ pub async fn handle_feedback_action(
         if display_options.json {
             println!("[]");
         } else {
-            println!("No feedback found for user: {}", identifier);
+            println!("No feedback found for user: {identifier}");
         }
         return Ok(());
     }
@@ -290,7 +290,7 @@ pub async fn handle_feedback_action(
     if display_options.json {
         println!("{}", serde_json::to_string_pretty(&feedback)?);
     } else {
-        println!("Feedback for user {}:", identifier);
+        println!("Feedback for user {identifier}:");
         for fb in feedback {
             println!("  Content ID: {}", fb.content_id);
             println!("  Type: {}", fb.r#type);

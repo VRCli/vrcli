@@ -58,11 +58,10 @@ impl AuthenticatedClient {
                 let cookie_jar = Arc::new(reqwest::cookie::Jar::default());
                 let vrchat_url = Url::parse("https://api.vrchat.cloud")?;
 
-                cookie_jar.add_cookie_str(&format!("auth={}", auth_cookie), &vrchat_url);
+                cookie_jar.add_cookie_str(&format!("auth={auth_cookie}"), &vrchat_url);
 
                 if let Some(tfa_cookie) = two_fa_cookie {
-                    cookie_jar
-                        .add_cookie_str(&format!("twoFactorAuth={}", tfa_cookie), &vrchat_url);
+                    cookie_jar.add_cookie_str(&format!("twoFactorAuth={tfa_cookie}"), &vrchat_url);
                 }
 
                 api_config.client = reqwest::Client::builder()
@@ -89,14 +88,12 @@ impl AuthenticatedClient {
                 let error_message = match auth_method {
                     AuthMethod::Cookie { .. } => {
                         format!(
-                            "Cookie authentication failed: {}. The auth cookie may have expired. Please re-run 'vrcli auth login'.",
-                            e
+                            "Cookie authentication failed: {e}. The auth cookie may have expired. Please re-run 'vrcli auth login'."
                         )
                     }
                     AuthMethod::Password { .. } => {
                         format!(
-                            "Password authentication failed: {}. Please check your credentials and re-run 'vrcli auth login'.",
-                            e
+                            "Password authentication failed: {e}. Please check your credentials and re-run 'vrcli auth login'."
                         )
                     }
                 };

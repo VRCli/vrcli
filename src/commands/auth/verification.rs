@@ -45,9 +45,9 @@ async fn verify_password_auth(username: &str, password: &str) -> Result<String> 
 async fn verify_cookie_auth(auth_cookie: &str, two_fa_cookie: Option<&str>) -> Result<String> {
     let jar = Arc::new(reqwest::cookie::Jar::default());
     let cookie_header = if let Some(tfa) = two_fa_cookie {
-        format!("auth={}, twoFactorAuth={}", auth_cookie, tfa)
+        format!("auth={auth_cookie}, twoFactorAuth={tfa}")
     } else {
-        format!("auth={}", auth_cookie)
+        format!("auth={auth_cookie}")
     };
 
     jar.set_cookies(

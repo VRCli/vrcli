@@ -145,22 +145,19 @@ pub async fn handle_remove_action(
             if status.is_friend {
                 // Unfriend the user
                 match apis::friends_api::unfriend(api_config, &user_id).await {
-                    Ok(_) => println!("Successfully unfriended user {}", user_id),
+                    Ok(_) => println!("Successfully unfriended user {user_id}"),
                     Err(e) => return Err(anyhow::anyhow!("Failed to unfriend user: {}", e)),
                 }
             } else if status.outgoing_request {
                 // Cancel outgoing friend request
                 match apis::friends_api::delete_friend_request(api_config, &user_id).await {
-                    Ok(_) => println!("Successfully cancelled friend request to {}", user_id),
+                    Ok(_) => println!("Successfully cancelled friend request to {user_id}"),
                     Err(e) => {
                         return Err(anyhow::anyhow!("Failed to cancel friend request: {}", e))
                     }
                 }
             } else {
-                println!(
-                    "No friendship or outgoing friend request found with user {}",
-                    user_id
-                );
+                println!("No friendship or outgoing friend request found with user {user_id}");
             }
         }
         Err(e) => {
@@ -190,7 +187,7 @@ pub async fn handle_status_action(
 
     match apis::friends_api::get_friend_status(api_config, &user_id).await {
         Ok(status) => {
-            println!("Friend status with user {}:", user_id);
+            println!("Friend status with user {user_id}:");
             println!("  Is friend: {}", status.is_friend);
             println!("  Incoming request: {}", status.incoming_request);
             println!("  Outgoing request: {}", status.outgoing_request);

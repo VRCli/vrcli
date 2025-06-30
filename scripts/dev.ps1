@@ -46,6 +46,17 @@ function Run-All-Checks {
     Write-Host "All checks completed successfully!" -ForegroundColor Green
 }
 
+function Run-CI-Local {
+    Write-Host "Running CI workflow locally (same as GitHub Actions)..." -ForegroundColor Cyan
+    Write-Host "Step 1: Format code" -ForegroundColor Yellow
+    cargo fmt --all
+    Write-Host "Step 2: Run clippy" -ForegroundColor Yellow
+    cargo clippy --all-targets --all-features -- -D warnings
+    Write-Host "Step 3: Run tests" -ForegroundColor Yellow
+    cargo test --verbose
+    Write-Host "Local CI checks completed successfully!" -ForegroundColor Green
+}
+
 function Build-Project {
     Write-Host "Building project..." -ForegroundColor Yellow
     cargo build
@@ -101,6 +112,7 @@ function Show-Help {
     Write-Host "  fix           - Fix all common issues (format + clippy-fix)"
     Write-Host "  test          - Run tests"
     Write-Host "  check         - Run all checks (format + clippy + test)"
+    Write-Host "  ci-local      - Run CI workflow locally (same as GitHub Actions)"
     Write-Host "  build         - Build project"
     Write-Host "  build-release - Build release version"
     Write-Host "  clean         - Clean build artifacts"

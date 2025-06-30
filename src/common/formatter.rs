@@ -28,7 +28,7 @@ impl GenericFormatter {
     /// Format items as table with specified options
     pub fn format_table<T: TableDisplayable>(items: &[T], options: &OutputOptions) -> Result<()> {
         let table_output = super::table::format_table(items, options);
-        print!("{}", table_output);
+        print!("{table_output}");
         Ok(())
     }
 

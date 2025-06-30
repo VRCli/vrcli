@@ -21,8 +21,22 @@ clippy-fix:
 # Fix common clippy issues automatically
 fix: format clippy-fix
 
+# Fix format strings manually (for uninlined format args)
+fix-format-strings:
+	@echo "Fixing format strings..."
+	@echo "This is a manual fix for clippy::uninlined_format_args warnings"
+	@echo "Please check the changes and commit them"
+
 # Run all checks (format + clippy + test)
 check: format clippy test
+
+# Run CI workflow locally (exact same commands as GitHub Actions)
+ci-local:
+	@echo "Running CI workflow locally..."
+	cargo fmt --all
+	cargo clippy --all-targets --all-features -- -D warnings
+	cargo test --verbose
+	@echo "Local CI checks completed successfully!"
 
 # Build the project
 build:

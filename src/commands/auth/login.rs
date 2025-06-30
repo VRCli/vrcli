@@ -88,11 +88,11 @@ pub async fn login_with_cookie() -> Result<()> {
 
     // Open browser to auth endpoint
     let auth_url = "https://vrchat.com/api/1/auth";
-    println!("Opening: {}", auth_url);
+    println!("Opening: {auth_url}");
 
     if let Err(e) = open::that(auth_url) {
-        println!("Failed to open browser automatically: {}", e);
-        println!("Please manually open: {}", auth_url);
+        println!("Failed to open browser automatically: {e}");
+        println!("Please manually open: {auth_url}");
     }
 
     let auth_cookie: String = Password::new("Enter your auth cookie value")
@@ -107,7 +107,7 @@ pub async fn login_with_cookie() -> Result<()> {
 
     // Create client with cookie
     let jar = Arc::new(reqwest::cookie::Jar::default());
-    let cookie_header = format!("auth={}", auth_cookie);
+    let cookie_header = format!("auth={auth_cookie}");
 
     jar.set_cookies(
         &mut [HeaderValue::from_str(&cookie_header)
@@ -142,7 +142,7 @@ pub async fn login_with_cookie() -> Result<()> {
             }
         },
         Err(e) => {
-            let error_msg = format!("{}", e);
+            let error_msg = format!("{e}");
             if error_msg.contains("401") || error_msg.contains("Unauthorized") {
                 utils::print_cookie_auth_help();
                 return Err(anyhow::anyhow!("Cookie authentication failed"));
@@ -163,7 +163,7 @@ async fn handle_successful_login(
     auth_cookie: Option<&str>,
     two_fa_cookie: Option<&str>,
 ) -> Result<()> {
-    println!("Authentication successful! Welcome, {}", display_name);
+    println!("Authentication successful! Welcome, {display_name}");
 
     let app_config = if let Some(cookie) = auth_cookie {
         Config::new_cookie(cookie.to_string(), two_fa_cookie.map(|s| s.to_string()))

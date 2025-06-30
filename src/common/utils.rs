@@ -44,7 +44,7 @@ pub fn format_platform_short(platform: &str) -> String {
         {
             // Unity version strings - extract year and show as "Unity YYYY"
             if let Ok(year) = platform.chars().take(4).collect::<String>().parse::<u16>() {
-                format!("Unity{}", year)
+                format!("Unity{year}")
             } else {
                 "Unity".to_string()
             }
@@ -54,7 +54,8 @@ pub fn format_platform_short(platform: &str) -> String {
         _ => {
             // For any other platform strings, truncate to first 8 characters for display
             if platform.len() > 8 {
-                format!("{}...", &platform[..5])
+                let truncated = &platform[..5];
+                format!("{truncated}...")
             } else {
                 platform.to_string()
             }
@@ -71,7 +72,8 @@ pub fn format_text_with_width(text: &str, width: usize) -> String {
     if display_width <= width {
         // Pad with spaces to exact width
         let padding = width - display_width;
-        format!("{}{}", text, " ".repeat(padding))
+        let spaces = " ".repeat(padding);
+        format!("{text}{spaces}")
     } else {
         // Need to truncate
         let mut truncated = String::new();
@@ -89,12 +91,13 @@ pub fn format_text_with_width(text: &str, width: usize) -> String {
         }
 
         // Add ellipsis and pad to exact width
-        let result = format!("{}...", truncated);
+        let result = format!("{truncated}...");
         let result_width = result.width();
 
         if result_width < width {
             let padding = width - result_width;
-            format!("{}{}", result, " ".repeat(padding))
+            let spaces = " ".repeat(padding);
+            format!("{result}{spaces}")
         } else {
             result
         }
@@ -142,7 +145,10 @@ pub async fn resolve_display_name_to_user_id(
     let suggestions: Vec<String> = search_results
         .iter()
         .take(5)
-        .map(|user| format!("  - {}", user.display_name))
+        .map(|user| {
+            let display_name = &user.display_name;
+            format!("  - {display_name}")
+        })
         .collect();
 
     Err(anyhow::anyhow!(

@@ -110,6 +110,6 @@ fn format_platform_for_sort(platform: &str) -> String {
         p if p.contains("windows") || p.contains("standalonewindows") => "1_PC".to_string(),
         p if p.contains("android") => "2_Quest".to_string(),
         p if p.contains("ios") => "3_iOS".to_string(),
-        _ => format!("9_{}", platform), // Unknown platforms at the end
+        _ => format!("9_{platform}"), // Unknown platforms at the end
     }
 }
