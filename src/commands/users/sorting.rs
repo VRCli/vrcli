@@ -20,7 +20,11 @@ impl From<&str> for UserSortMethod {
 
 /// Sort users by the specified method
 #[allow(dead_code)]
-pub fn sort_users(users: &mut [crate::commands::users::table_adapter::UserTableItem], sort_method: UserSortMethod, reverse: bool) {
+pub fn sort_users(
+    users: &mut [crate::commands::users::table_adapter::UserTableItem],
+    sort_method: UserSortMethod,
+    reverse: bool,
+) {
     users.sort_by(|a, b| {
         let ordering = match sort_method {
             UserSortMethod::Name => a.display_name.cmp(&b.display_name),
@@ -34,7 +38,7 @@ pub fn sort_users(users: &mut [crate::commands::users::table_adapter::UserTableI
                     (_, "N/A") => std::cmp::Ordering::Less,
                     (a_act, b_act) => a_act.cmp(b_act),
                 }
-            },
+            }
             UserSortMethod::DateJoined => {
                 // Compare date joined strings directly
                 // "N/A" should be sorted to the end
@@ -44,7 +48,7 @@ pub fn sort_users(users: &mut [crate::commands::users::table_adapter::UserTableI
                     (_, "N/A") => std::cmp::Ordering::Less,
                     (a_date, b_date) => a_date.cmp(b_date),
                 }
-            },
+            }
         };
 
         if reverse {

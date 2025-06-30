@@ -1,10 +1,7 @@
+use super::{fetcher, sorting, table_adapter::FriendTableItem};
+use crate::common::{command_utils::display_results, display_options::DisplayOptions};
 use anyhow::Result;
 use vrchatapi::apis;
-use crate::common::{
-    display_options::DisplayOptions, 
-    command_utils::display_results,
-};
-use super::{fetcher, sorting, table_adapter::FriendTableItem};
 
 /// Configuration for list action filter and sort options
 #[derive(Debug, Clone)]
@@ -37,9 +34,19 @@ pub async fn handle_list_action(
     if let Some(sort_method_enum) = sorting::SortMethod::from_str(&filter_options.sort_method) {
         sorting::sort_friends(&mut all_friends, sort_method_enum, filter_options.reverse);
     } else {
-        eprintln!("Warning: Unknown sort method '{}'. Using default 'name' sorting.", filter_options.sort_method);
-        eprintln!("Available methods: {}", sorting::SortMethod::all_methods().join(", "));
-        sorting::sort_friends(&mut all_friends, sorting::SortMethod::Name, filter_options.reverse);
+        eprintln!(
+            "Warning: Unknown sort method '{}'. Using default 'name' sorting.",
+            filter_options.sort_method
+        );
+        eprintln!(
+            "Available methods: {}",
+            sorting::SortMethod::all_methods().join(", ")
+        );
+        sorting::sort_friends(
+            &mut all_friends,
+            sorting::SortMethod::Name,
+            filter_options.reverse,
+        );
     }
 
     // Apply limit after sorting to get the correct top N items
@@ -48,10 +55,7 @@ pub async fn handle_list_action(
     }
 
     // Convert to table items
-    let table_items: Vec<FriendTableItem> = all_friends
-        .iter()
-        .map(FriendTableItem::new)
-        .collect();
+    let table_items: Vec<FriendTableItem> = all_friends.iter().map(FriendTableItem::new).collect();
 
     // Use common display function
     display_results(&table_items, &display_options, "No friends found.")
@@ -73,7 +77,7 @@ pub async fn handle_get_action(
         // Try to resolve identifier (could be display name or user ID)
         crate::common::utils::resolve_user_identifier(api_config, identifier).await?
     };
-    
+
     let user = apis::users_api::get_user(api_config, &user_id).await?;
     println!("User: {} ({})", user.display_name, user.id);
     println!("Status: {}", user.status_description);
@@ -84,7 +88,7 @@ pub async fn handle_get_action(
     if !user.tags.is_empty() {
         println!("Tags: {}", user.tags.join(", "));
     }
-    
+
     Ok(())
 }
 
@@ -104,7 +108,7 @@ pub async fn handle_add_action(
         // Try to resolve identifier (could be display name or user ID)
         crate::common::utils::resolve_user_identifier(api_config, identifier).await?
     };
-    
+
     match apis::friends_api::friend(api_config, &user_id).await {
         Ok(notification) => {
             println!("Friend request sent successfully!");
@@ -114,7 +118,7 @@ pub async fn handle_add_action(
             return Err(anyhow::anyhow!("Failed to send friend request: {}", e));
         }
     }
-    
+
     Ok(())
 }
 
@@ -134,7 +138,7 @@ pub async fn handle_remove_action(
         // Try to resolve identifier (could be display name or user ID)
         crate::common::utils::resolve_user_identifier(api_config, identifier).await?
     };
-    
+
     // First check if they are a friend or if there's an outgoing request
     match apis::friends_api::get_friend_status(api_config, &user_id).await {
         Ok(status) => {
@@ -148,17 +152,22 @@ pub async fn handle_remove_action(
                 // Cancel outgoing friend request
                 match apis::friends_api::delete_friend_request(api_config, &user_id).await {
                     Ok(_) => println!("Successfully cancelled friend request to {}", user_id),
-                    Err(e) => return Err(anyhow::anyhow!("Failed to cancel friend request: {}", e)),
+                    Err(e) => {
+                        return Err(anyhow::anyhow!("Failed to cancel friend request: {}", e))
+                    }
                 }
             } else {
-                println!("No friendship or outgoing friend request found with user {}", user_id);
+                println!(
+                    "No friendship or outgoing friend request found with user {}",
+                    user_id
+                );
             }
         }
         Err(e) => {
             return Err(anyhow::anyhow!("Failed to check friend status: {}", e));
         }
     }
-    
+
     Ok(())
 }
 
@@ -178,14 +187,14 @@ pub async fn handle_status_action(
         // Try to resolve identifier (could be display name or user ID)
         crate::common::utils::resolve_user_identifier(api_config, identifier).await?
     };
-    
+
     match apis::friends_api::get_friend_status(api_config, &user_id).await {
         Ok(status) => {
             println!("Friend status with user {}:", user_id);
             println!("  Is friend: {}", status.is_friend);
             println!("  Incoming request: {}", status.incoming_request);
             println!("  Outgoing request: {}", status.outgoing_request);
-            
+
             if status.is_friend {
                 println!("  → You are friends with this user");
             } else if status.incoming_request {
@@ -200,6 +209,6 @@ pub async fn handle_status_action(
             return Err(anyhow::anyhow!("Failed to get friend status: {}", e));
         }
     }
-    
+
     Ok(())
 }

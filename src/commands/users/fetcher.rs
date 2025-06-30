@@ -33,7 +33,8 @@ pub async fn search_users(
         developer_type.as_deref(),
         Some(limit),
         Some(offset),
-    ).await?;
+    )
+    .await?;
     Ok(users)
 }
 
@@ -64,7 +65,7 @@ pub async fn update_user_note(
         target_user_id: user_id.to_string(),
         note: note_content.to_string(),
     };
-    
+
     let note = users_api::update_user_note(api_config, request).await?;
     Ok(note)
 }

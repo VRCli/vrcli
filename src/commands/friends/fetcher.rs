@@ -1,7 +1,7 @@
 use anyhow::Result;
-use vrchatapi::apis;
 use futures::stream::{self, StreamExt, TryStreamExt};
 use std::collections::HashSet;
+use vrchatapi::apis;
 
 /// Fetch pages of friends in parallel for a specific status (online/offline)
 /// Note: limit is applied after sorting in the caller, not here
@@ -11,7 +11,7 @@ pub async fn fetch_pages_parallel(
     limit: Option<i32>,
 ) -> Result<Vec<vrchatapi::models::LimitedUserFriend>> {
     let page_size = 60i32;
-    
+
     // Fetch more pages when limit is specified to ensure we have enough data for sorting
     // The actual limit will be applied after sorting in the handler
     let max_pages = limit
@@ -21,12 +21,12 @@ pub async fn fetch_pages_parallel(
             min_pages.max(3) // At least 3 pages to have reasonable data
         })
         .unwrap_or(20); // Reasonable default max pages to avoid infinite fetching
-    
+
     // Build a stream of page offsets: 0, 60, 120, … up to max_pages
     let offsets = (0..max_pages)
         .map(move |i| i as i32 * page_size)
         .collect::<Vec<_>>();
-    
+
     // Turn that into a concurrent stream of futures, with bounded concurrency
     let friends_batches: Vec<Vec<vrchatapi::models::LimitedUserFriend>> = stream::iter(offsets)
         .map(|offset| {
@@ -47,10 +47,10 @@ pub async fn fetch_pages_parallel(
         })
         .try_collect() // Collect Vec<Vec<LimitedUserFriend>>
         .await?;
-    
+
     // Flatten batches into one Vec<LimitedUserFriend>
     let result = friends_batches.into_iter().flatten().collect::<Vec<_>>();
-    
+
     // Don't apply limit here - it will be applied after sorting in the handler
     Ok(result)
 }
@@ -63,24 +63,26 @@ pub async fn fetch_all_friends_parallel(
 ) -> Result<Vec<vrchatapi::models::LimitedUserFriend>> {
     // Spawn two tasks: one for online, one for offline
     let api_config_clone = api_config.clone();
-    let online_task = tokio::spawn(async move {
-        fetch_pages_parallel(&api_config_clone, Some(false), limit).await
-    });
-    
+    let online_task =
+        tokio::spawn(
+            async move { fetch_pages_parallel(&api_config_clone, Some(false), limit).await },
+        );
+
     let api_config_clone = api_config.clone();
-    let offline_task = tokio::spawn(async move {
-        fetch_pages_parallel(&api_config_clone, Some(true), limit).await
-    });
-    
+    let offline_task =
+        tokio::spawn(
+            async move { fetch_pages_parallel(&api_config_clone, Some(true), limit).await },
+        );
+
     // Wait for both to finish
     let (online_result, offline_result) = tokio::try_join!(online_task, offline_task)?;
     let online = online_result?;
     let offline = offline_result?;
-    
+
     // Merge & dedupe
     let mut seen = HashSet::new();
     let mut merged = Vec::new();
-    
+
     for friend in online.into_iter().chain(offline) {
         if seen.insert(friend.id.clone()) {
             merged.push(friend);

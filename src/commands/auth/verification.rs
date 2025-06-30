@@ -1,7 +1,7 @@
 // Authentication verification utilities
 // Currently unused but kept for future auth status command implementation
 
-use crate::config::{Config, AuthMethod};
+use crate::config::{AuthMethod, Config};
 use anyhow::Result;
 use reqwest::cookie::CookieStore;
 use reqwest::header::HeaderValue;
@@ -18,9 +18,10 @@ pub async fn verify_current_auth(config: &Config) -> Result<String> {
         AuthMethod::Password { username, password } => {
             verify_password_auth(username, password).await
         }
-        AuthMethod::Cookie { auth_cookie, two_fa_cookie } => {
-            verify_cookie_auth(auth_cookie, two_fa_cookie.as_deref()).await
-        }
+        AuthMethod::Cookie {
+            auth_cookie,
+            two_fa_cookie,
+        } => verify_cookie_auth(auth_cookie, two_fa_cookie.as_deref()).await,
     }
 }
 
@@ -32,7 +33,7 @@ async fn verify_password_auth(username: &str, password: &str) -> Result<String> 
         user_agent: Some(String::from("vrcli/0.1.0")),
         ..Default::default()
     };
-    
+
     match apis::authentication_api::get_current_user(&api_config).await? {
         EitherUserOrTwoFactor::CurrentUser(user) => Ok(user.display_name),
         _ => Err(anyhow::anyhow!("Authentication required")),
@@ -48,10 +49,9 @@ async fn verify_cookie_auth(auth_cookie: &str, two_fa_cookie: Option<&str>) -> R
     } else {
         format!("auth={}", auth_cookie)
     };
-    
+
     jar.set_cookies(
-        &mut [HeaderValue::from_str(&cookie_header)?]
-        .iter(),
+        &mut [HeaderValue::from_str(&cookie_header)?].iter(),
         &Url::from_str("https://api.vrchat.cloud")?,
     );
 
@@ -65,7 +65,7 @@ async fn verify_cookie_auth(auth_cookie: &str, two_fa_cookie: Option<&str>) -> R
         user_agent: Some(String::from("vrcli/0.1.0")),
         ..Default::default()
     };
-    
+
     match apis::authentication_api::get_current_user(&api_config).await? {
         EitherUserOrTwoFactor::CurrentUser(user) => Ok(user.display_name),
         _ => Err(anyhow::anyhow!("Cookie authentication failed")),

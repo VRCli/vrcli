@@ -15,27 +15,35 @@ impl TableDisplayable for FriendTableItem<'_> {
     fn display_name(&self) -> &str {
         &self.friend.display_name
     }
-    
+
     fn id(&self) -> Option<&str> {
         Some(&self.friend.id)
     }
-    
+
     fn status(&self) -> Option<String> {
-        Some(crate::common::utils::format_user_status(&self.friend.status, false))
+        Some(crate::common::utils::format_user_status(
+            &self.friend.status,
+            false,
+        ))
     }
-    
+
     fn colored_status(&self) -> Option<String> {
-        Some(crate::common::utils::format_user_status(&self.friend.status, true))
+        Some(crate::common::utils::format_user_status(
+            &self.friend.status,
+            true,
+        ))
     }
-    
+
     fn platform(&self) -> Option<&str> {
         Some(&self.friend.last_platform)
     }
-    
+
     fn formatted_platform(&self) -> Option<String> {
-        Some(crate::common::utils::format_platform_short(&self.friend.last_platform))
+        Some(crate::common::utils::format_platform_short(
+            &self.friend.last_platform,
+        ))
     }
-    
+
     fn location(&self) -> Option<&str> {
         if self.friend.location.is_empty() || self.friend.location == "private" {
             Some("private")
@@ -43,7 +51,7 @@ impl TableDisplayable for FriendTableItem<'_> {
             Some(&self.friend.location)
         }
     }
-    
+
     fn activity(&self) -> Option<&str> {
         self.friend.last_activity.as_deref()
     }

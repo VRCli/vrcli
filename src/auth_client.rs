@@ -1,4 +1,4 @@
-use crate::config::{Config, AuthMethod};
+use crate::config::{AuthMethod, Config};
 use anyhow::Result;
 use std::sync::Arc;
 use url::Url;
@@ -51,14 +51,18 @@ impl AuthenticatedClient {
             AuthMethod::Password { username, password } => {
                 api_config.basic_auth = Some((username.clone(), Some(password.clone())));
             }
-            AuthMethod::Cookie { auth_cookie, two_fa_cookie } => {
+            AuthMethod::Cookie {
+                auth_cookie,
+                two_fa_cookie,
+            } => {
                 let cookie_jar = Arc::new(reqwest::cookie::Jar::default());
                 let vrchat_url = Url::parse("https://api.vrchat.cloud")?;
 
                 cookie_jar.add_cookie_str(&format!("auth={}", auth_cookie), &vrchat_url);
 
                 if let Some(tfa_cookie) = two_fa_cookie {
-                    cookie_jar.add_cookie_str(&format!("twoFactorAuth={}", tfa_cookie), &vrchat_url);
+                    cookie_jar
+                        .add_cookie_str(&format!("twoFactorAuth={}", tfa_cookie), &vrchat_url);
                 }
 
                 api_config.client = reqwest::Client::builder()

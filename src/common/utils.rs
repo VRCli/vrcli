@@ -1,5 +1,5 @@
-use colored::*;
 use anyhow::Result;
+use colored::*;
 use vrchatapi::apis;
 
 /// Format VRChat user status with color support
@@ -11,7 +11,7 @@ pub fn format_user_status(status: &vrchatapi::models::UserStatus, use_color: boo
         vrchatapi::models::UserStatus::Busy => "Busy",
         vrchatapi::models::UserStatus::Offline => "Offline",
     };
-    
+
     if use_color {
         match status {
             vrchatapi::models::UserStatus::Active => status_text.green().to_string(),
@@ -34,16 +34,21 @@ pub fn format_platform_short(platform: &str) -> String {
         "ios" => "iOS".to_string(),
         "steamvr" => "SteamVR".to_string(),
         "oculuspc" => "Oculus".to_string(),
-        platform if platform.starts_with("2019.") || platform.starts_with("2020.") 
-                 || platform.starts_with("2021.") || platform.starts_with("2022.") 
-                 || platform.starts_with("2023.") || platform.starts_with("2024.") => {
+        platform
+            if platform.starts_with("2019.")
+                || platform.starts_with("2020.")
+                || platform.starts_with("2021.")
+                || platform.starts_with("2022.")
+                || platform.starts_with("2023.")
+                || platform.starts_with("2024.") =>
+        {
             // Unity version strings - extract year and show as "Unity YYYY"
             if let Ok(year) = platform.chars().take(4).collect::<String>().parse::<u16>() {
                 format!("Unity{}", year)
             } else {
                 "Unity".to_string()
             }
-        },
+        }
         "unknownplatform" => "Unknown".to_string(),
         "" => "Unknown".to_string(),
         _ => {
@@ -60,9 +65,9 @@ pub fn format_platform_short(platform: &str) -> String {
 /// Helper function to truncate text with Unicode width handling
 pub fn format_text_with_width(text: &str, width: usize) -> String {
     use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
-    
+
     let display_width = text.width();
-    
+
     if display_width <= width {
         // Pad with spaces to exact width
         let padding = width - display_width;
@@ -72,7 +77,7 @@ pub fn format_text_with_width(text: &str, width: usize) -> String {
         let mut truncated = String::new();
         let mut current_width = 0;
         let available_width = width.saturating_sub(3); // Reserve space for "..."
-        
+
         for ch in text.chars() {
             let char_width = ch.width().unwrap_or(0);
             if current_width + char_width <= available_width {
@@ -82,11 +87,11 @@ pub fn format_text_with_width(text: &str, width: usize) -> String {
                 break;
             }
         }
-        
+
         // Add ellipsis and pad to exact width
         let result = format!("{}...", truncated);
         let result_width = result.width();
-        
+
         if result_width < width {
             let padding = width - result_width;
             format!("{}{}", result, " ".repeat(padding))
@@ -111,19 +116,23 @@ pub async fn resolve_display_name_to_user_id(
     let search_results = apis::users_api::search_users(
         api_config,
         Some(display_name),
-        None, // developer_type
+        None,     // developer_type
         Some(10), // limit to 10 results
-        None, // offset
-    ).await?;
+        None,     // offset
+    )
+    .await?;
 
     if search_results.is_empty() {
-        return Err(anyhow::anyhow!("No users found with display name '{}'", display_name));
+        return Err(anyhow::anyhow!(
+            "No users found with display name '{}'",
+            display_name
+        ));
     }
 
     // Look for exact match (case-insensitive)
-    let exact_match = search_results.iter().find(|user| {
-        user.display_name.to_lowercase() == display_name.to_lowercase()
-    });
+    let exact_match = search_results
+        .iter()
+        .find(|user| user.display_name.to_lowercase() == display_name.to_lowercase());
 
     if let Some(user) = exact_match {
         return Ok(user.id.clone());

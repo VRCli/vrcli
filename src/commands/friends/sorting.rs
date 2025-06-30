@@ -3,11 +3,11 @@ use std::cmp::Ordering;
 /// Supported sorting methods for friends list
 #[derive(Debug, Clone, Copy)]
 pub enum SortMethod {
-    Name,           // Sort by display name (default)
-    Status,         // Sort by online status (online first)
-    Activity,       // Sort by last activity time
-    Platform,       // Sort by platform
-    Id,             // Sort by user ID
+    Name,     // Sort by display name (default)
+    Status,   // Sort by online status (online first)
+    Activity, // Sort by last activity time
+    Platform, // Sort by platform
+    Id,       // Sort by user ID
 }
 
 impl SortMethod {
@@ -39,14 +39,19 @@ pub fn sort_friends(
         let ordering = match method {
             SortMethod::Name => {
                 // Case-insensitive alphabetical order
-                a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase())
+                a.display_name
+                    .to_lowercase()
+                    .cmp(&b.display_name.to_lowercase())
             }
             SortMethod::Status => {
                 // Sort by status priority, then by name
                 let a_priority = get_status_priority(&a.status);
                 let b_priority = get_status_priority(&b.status);
                 match a_priority.cmp(&b_priority) {
-                    Ordering::Equal => a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase()),
+                    Ordering::Equal => a
+                        .display_name
+                        .to_lowercase()
+                        .cmp(&b.display_name.to_lowercase()),
                     other => other,
                 }
             }
@@ -56,7 +61,10 @@ pub fn sort_friends(
                     (Some(a_activity), Some(b_activity)) => b_activity.cmp(a_activity),
                     (Some(_), None) => Ordering::Less,
                     (None, Some(_)) => Ordering::Greater,
-                    (None, None) => a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase()),
+                    (None, None) => a
+                        .display_name
+                        .to_lowercase()
+                        .cmp(&b.display_name.to_lowercase()),
                 }
             }
             SortMethod::Platform => {
@@ -64,7 +72,10 @@ pub fn sort_friends(
                 let a_platform = format_platform_for_sort(&a.last_platform);
                 let b_platform = format_platform_for_sort(&b.last_platform);
                 match a_platform.cmp(&b_platform) {
-                    Ordering::Equal => a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase()),
+                    Ordering::Equal => a
+                        .display_name
+                        .to_lowercase()
+                        .cmp(&b.display_name.to_lowercase()),
                     other => other,
                 }
             }
@@ -85,11 +96,11 @@ pub fn sort_friends(
 /// Get status priority for sorting (lower number = higher priority)
 fn get_status_priority(status: &vrchatapi::models::UserStatus) -> u8 {
     match status {
-        vrchatapi::models::UserStatus::Active => 1,   // Most available
-        vrchatapi::models::UserStatus::JoinMe => 2,   // Welcoming joins
-        vrchatapi::models::UserStatus::AskMe => 3,    // Ask before joining
-        vrchatapi::models::UserStatus::Busy => 4,     // Online but busy
-        vrchatapi::models::UserStatus::Offline => 5,  // Offline
+        vrchatapi::models::UserStatus::Active => 1, // Most available
+        vrchatapi::models::UserStatus::JoinMe => 2, // Welcoming joins
+        vrchatapi::models::UserStatus::AskMe => 3,  // Ask before joining
+        vrchatapi::models::UserStatus::Busy => 4,   // Online but busy
+        vrchatapi::models::UserStatus::Offline => 5, // Offline
     }
 }
 

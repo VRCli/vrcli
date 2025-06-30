@@ -1,12 +1,12 @@
 mod fetcher;
 mod handlers;
 mod sorting;
-mod utils;
 mod table_adapter;
+mod utils;
 
 use crate::auth_client::AuthenticatedClient;
-use crate::FriendsAction;
 use crate::common::display_options::DisplayOptions;
+use crate::FriendsAction;
 use anyhow::Result;
 use handlers::ListFilterOptions;
 
@@ -15,11 +15,11 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
     let api_config = auth_client.api_config();
 
     match action {
-        FriendsAction::List { 
-            offline, 
-            online, 
-            limit, 
-            offset: _, 
+        FriendsAction::List {
+            offline,
+            online,
+            limit,
+            offset: _,
             long,
             show_id,
             show_status,
@@ -28,9 +28,9 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
             show_activity,
             json,
             sort,
-            reverse, 
+            reverse,
             all,
-            help: _ 
+            help: _,
         } => {
             let filter_options = ListFilterOptions {
                 offline,
@@ -39,11 +39,11 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
                 sort_method: sort,
                 reverse,
             };
-            
+
             let display_options = DisplayOptions::from_flags(
                 long || all, // Backward compatibility: -a maps to -l
                 show_id,
-                show_status || all, // -a shows status by default
+                show_status || all,   // -a shows status by default
                 show_platform || all, // -a shows platform by default
                 show_location || all, // -a shows location by default
                 show_activity || all, // -a shows activity by default

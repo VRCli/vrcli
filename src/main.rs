@@ -1,10 +1,10 @@
-mod commands;
-mod config;
 mod auth_client;
+mod commands;
 mod common;
+mod config;
 
-use clap::{Parser, Subcommand};
 use anyhow::Result;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "vrcli")]
@@ -85,7 +85,7 @@ enum FriendsAction {
         help: (),
     },
     /// Get friend details by username
-    Get { 
+    Get {
         /// User identifier (display name or user ID)
         identifier: String,
         /// Use direct user ID instead of resolving display name
@@ -93,7 +93,7 @@ enum FriendsAction {
         id: bool,
     },
     /// Send a friend request to a user
-    Add { 
+    Add {
         /// User identifier (display name or user ID)
         identifier: String,
         /// Use direct user ID instead of resolving display name
@@ -101,7 +101,7 @@ enum FriendsAction {
         id: bool,
     },
     /// Remove a friend or cancel outgoing friend request
-    Remove { 
+    Remove {
         /// User identifier (display name or user ID)
         identifier: String,
         /// Use direct user ID instead of resolving display name
@@ -109,7 +109,7 @@ enum FriendsAction {
         id: bool,
     },
     /// Check friend status with a user
-    Status { 
+    Status {
         /// User identifier (display name or user ID)
         identifier: String,
         /// Use direct user ID instead of resolving display name
@@ -148,7 +148,7 @@ enum UsersAction {
         #[arg(short = 'l', long)]
         long: bool,
     },
-    
+
     /// Get user information by ID or display name
     Get {
         /// User identifier (display name or user ID)
@@ -160,7 +160,7 @@ enum UsersAction {
         #[arg(long)]
         json: bool,
     },
-    
+
     /// Get user by exact username
     GetByName {
         /// Exact username to look up
@@ -169,11 +169,11 @@ enum UsersAction {
         #[arg(long)]
         json: bool,
     },
-    
+
     /// User notes management
     #[command(subcommand)]
     Note(NoteAction),
-    
+
     /// List all user notes
     Notes {
         /// Output in JSON format
@@ -183,7 +183,7 @@ enum UsersAction {
         #[arg(short = 'l', long)]
         long: bool,
     },
-    
+
     /// Get user feedback
     Feedback {
         /// User identifier
@@ -210,7 +210,7 @@ enum NoteAction {
         #[arg(long)]
         json: bool,
     },
-    
+
     /// Set/update note for a user
     Set {
         /// User identifier

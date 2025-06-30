@@ -1,6 +1,8 @@
+use crate::common::{
+    display_options::DisplayOptions, formatter::GenericFormatter, table::TableDisplayable,
+};
 /// Common result handling utilities for commands
 use anyhow::Result;
-use crate::common::{display_options::DisplayOptions, formatter::GenericFormatter, table::TableDisplayable};
 
 /// Handle empty results with appropriate output based on display options
 pub fn handle_empty_results(display_options: &DisplayOptions, context_message: &str) -> Result<()> {

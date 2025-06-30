@@ -1,5 +1,5 @@
-use crate::common::table::TableDisplayable;
 use crate::common::output_options::OutputOptions;
+use crate::common::table::TableDisplayable;
 use serde_json::{Map, Value};
 
 /// Adapter for converting user data to table format
@@ -8,7 +8,7 @@ pub struct UserTableItem {
     pub display_name: String,
     pub username: Option<String>,
     pub status: String,
-    pub status_enum: vrchatapi::models::UserStatus,  // Store original enum for color formatting
+    pub status_enum: vrchatapi::models::UserStatus, // Store original enum for color formatting
     pub last_activity: String,
     pub date_joined: String,
     pub platform: String,
@@ -28,7 +28,10 @@ impl TableDisplayable for UserTableItem {
     }
 
     fn colored_status(&self) -> Option<String> {
-        Some(crate::common::utils::format_user_status(&self.status_enum, true))
+        Some(crate::common::utils::format_user_status(
+            &self.status_enum,
+            true,
+        ))
     }
 
     fn platform(&self) -> Option<&str> {
@@ -45,30 +48,39 @@ impl TableDisplayable for UserTableItem {
 
     fn to_json_object(&self, options: &OutputOptions) -> Value {
         let mut obj = Map::new();
-        
-        obj.insert("display_name".to_string(), Value::String(self.display_name.clone()));
-        
+
+        obj.insert(
+            "display_name".to_string(),
+            Value::String(self.display_name.clone()),
+        );
+
         if options.show_id {
             obj.insert("id".to_string(), Value::String(self.id.clone()));
         }
-        
+
         if let Some(username) = &self.username {
             obj.insert("username".to_string(), Value::String(username.clone()));
         }
-        
+
         if options.show_status {
             obj.insert("status".to_string(), Value::String(self.status.clone()));
         }
-        
+
         if options.show_activity {
-            obj.insert("last_activity".to_string(), Value::String(self.last_activity.clone()));
-            obj.insert("date_joined".to_string(), Value::String(self.date_joined.clone()));
+            obj.insert(
+                "last_activity".to_string(),
+                Value::String(self.last_activity.clone()),
+            );
+            obj.insert(
+                "date_joined".to_string(),
+                Value::String(self.date_joined.clone()),
+            );
         }
-        
+
         if options.show_platform {
             obj.insert("platform".to_string(), Value::String(self.platform.clone()));
         }
-        
+
         Value::Object(obj)
     }
 }

@@ -1,10 +1,8 @@
-use anyhow::Result;
+use super::{fetcher, table_adapter::UserTableItem, utils};
 use crate::common::{
-    display_options::DisplayOptions,
-    command_utils::display_results,
-    table::TableDisplayable,
+    command_utils::display_results, display_options::DisplayOptions, table::TableDisplayable,
 };
-use super::{fetcher, utils, table_adapter::UserTableItem};
+use anyhow::Result;
 
 /// Configuration for user search options
 #[derive(Debug, Clone)]
@@ -17,7 +15,7 @@ pub struct UserSearchOptions {
 
 /// Display a single user in Unix-style format (key: value pairs)
 fn display_single_user(
-    user: &UserTableItem, 
+    user: &UserTableItem,
     options: &DisplayOptions,
     auth_client: &crate::auth_client::AuthenticatedClient,
 ) -> Result<()> {
@@ -29,41 +27,43 @@ fn display_single_user(
 
     // Basic information always shown
     println!("Name: {}", user.display_name);
-    
+
     if options.show_id {
         println!("ID: {}", user.id);
     }
-    
+
     if let Some(username) = &user.username {
         println!("Username: {}", username);
     }
-    
+
     if options.show_status {
         // Use colored status for better visibility
         let colored_status = crate::common::utils::format_user_status(&user.status_enum, true);
         println!("Status: {}", colored_status);
     }
-    
+
     if options.show_platform {
         let formatted_platform = crate::common::utils::format_platform_short(&user.platform);
         println!("Platform: {}", formatted_platform);
     }
-    
+
     if options.show_activity {
         println!("Last Activity: {}", user.last_activity);
         if user.date_joined != "N/A" {
             println!("Joined: {}", user.date_joined);
         }
     }
-    
+
     // Check if this is the current logged-in user
     if let Some(current_user) = auth_client.current_user() {
         if user.id == current_user.id {
-            println!("
-* Despite Everything, It's Still You.");
+            println!(
+                "
+* Despite Everything, It's Still You."
+            );
         }
     }
-    
+
     Ok(())
 }
 
@@ -79,11 +79,16 @@ pub async fn handle_search_action(
         search_options.limit,
         search_options.offset,
         search_options.developer_type,
-    ).await?;
+    )
+    .await?;
 
     let user_items: Vec<UserTableItem> = users.into_iter().map(UserTableItem::from).collect();
 
-    display_results(&user_items, &display_options, &format!("No users found for query: {}", search_options.query))
+    display_results(
+        &user_items,
+        &display_options,
+        &format!("No users found for query: {}", search_options.query),
+    )
 }
 
 /// Handle the Get action
@@ -95,19 +100,19 @@ pub async fn handle_get_action(
 ) -> Result<()> {
     let api_config = auth_client.api_config();
     let (resolved_id, is_user_id) = utils::resolve_user_identifier(identifier, use_id);
-    
+
     let user = if is_user_id {
         fetcher::fetch_user_by_id(api_config, &resolved_id).await?
     } else {
         // If not a user ID, we need to search first to get the user ID
         let search_results = fetcher::search_users(api_config, &resolved_id, 10, 0, None).await?;
-        
+
         // Find exact match by display name
         let matching_user = search_results
             .into_iter()
             .find(|u| u.display_name.eq_ignore_ascii_case(&resolved_id))
             .ok_or_else(|| anyhow::anyhow!("User not found: {}", resolved_id))?;
-        
+
         fetcher::fetch_user_by_id(api_config, &matching_user.id).await?
     };
 
@@ -151,7 +156,7 @@ pub async fn handle_note_get_action(
     display_options: DisplayOptions,
 ) -> Result<()> {
     let (resolved_id, is_user_id) = utils::resolve_user_identifier(identifier, use_id);
-    
+
     // Get the user ID if not already provided
     let target_user_id = if is_user_id {
         resolved_id
@@ -193,7 +198,7 @@ pub async fn handle_note_set_action(
     use_id: bool,
 ) -> Result<()> {
     let (resolved_id, is_user_id) = utils::resolve_user_identifier(identifier, use_id);
-    
+
     // Get the user ID if not already provided
     let target_user_id = if is_user_id {
         resolved_id
@@ -207,7 +212,10 @@ pub async fn handle_note_set_action(
     };
 
     let updated_note = fetcher::update_user_note(api_config, &target_user_id, note).await?;
-    println!("Note updated for user {}: {}", identifier, updated_note.note);
+    println!(
+        "Note updated for user {}: {}",
+        identifier, updated_note.note
+    );
 
     Ok(())
 }
@@ -255,7 +263,7 @@ pub async fn handle_feedback_action(
     display_options: DisplayOptions,
 ) -> Result<()> {
     let (resolved_id, is_user_id) = utils::resolve_user_identifier(identifier, use_id);
-    
+
     // Get the user ID if not already provided
     let target_user_id = if is_user_id {
         resolved_id

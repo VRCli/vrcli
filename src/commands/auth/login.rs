@@ -1,6 +1,8 @@
+use super::{two_factor, utils};
 use crate::config::Config;
 use anyhow::Result;
-use inquire::{Text, Password, Select};
+use inquire::{Password, Select, Text};
+use open;
 use reqwest::cookie::CookieStore;
 use reqwest::header::HeaderValue;
 use std::str::FromStr;
@@ -8,16 +10,11 @@ use std::sync::Arc;
 use url::Url;
 use vrchatapi::apis;
 use vrchatapi::models::EitherUserOrTwoFactor;
-use open;
-use super::{two_factor, utils};
 
 /// Interactive login method selection
 pub async fn login_interactive() -> Result<()> {
-    let options = vec![
-        "Cookie",
-        "Username and Password (Not Recommended)"
-    ];
-    
+    let options = vec!["Cookie", "Username and Password (Not Recommended)"];
+
     let auth_method = Select::new("Select auth method", options)
         .with_starting_cursor(0) // Default to Cookie
         .prompt()?;
@@ -31,12 +28,9 @@ pub async fn login_interactive() -> Result<()> {
 
 /// Login with username and password
 pub async fn login_with_password() -> Result<()> {
-    let username: String = Text::new("Username")
-        .prompt()?;
+    let username: String = Text::new("Username").prompt()?;
 
-    let password: String = Password::new("Password")
-        .without_confirmation()
-        .prompt()?;
+    let password: String = Password::new("Password").without_confirmation().prompt()?;
 
     println!("Verifying credentials...");
 
@@ -51,16 +45,29 @@ pub async fn login_with_password() -> Result<()> {
         Ok(response) => {
             match response {
                 EitherUserOrTwoFactor::CurrentUser(user) => {
-                    handle_successful_login(&user.display_name, &username, &password, None, None).await?;
+                    handle_successful_login(&user.display_name, &username, &password, None, None)
+                        .await?;
                 }
                 EitherUserOrTwoFactor::RequiresTwoFactorAuth(requires_auth) => {
                     // Handle 2FA
-                    two_factor::handle_two_factor_auth(&config, &requires_auth.requires_two_factor_auth).await?;
-                    
+                    two_factor::handle_two_factor_auth(
+                        &config,
+                        &requires_auth.requires_two_factor_auth,
+                    )
+                    .await?;
+
                     // Re-verify after 2FA
-                    if let Ok(EitherUserOrTwoFactor::CurrentUser(user)) = 
-                        apis::authentication_api::get_current_user(&config).await {
-                        handle_successful_login(&user.display_name, &username, &password, None, None).await?;
+                    if let Ok(EitherUserOrTwoFactor::CurrentUser(user)) =
+                        apis::authentication_api::get_current_user(&config).await
+                    {
+                        handle_successful_login(
+                            &user.display_name,
+                            &username,
+                            &password,
+                            None,
+                            None,
+                        )
+                        .await?;
                     } else {
                         return Err(anyhow::anyhow!("Failed to authenticate after 2FA"));
                     }
@@ -78,11 +85,11 @@ pub async fn login_with_password() -> Result<()> {
 /// Login with auth cookie
 pub async fn login_with_cookie() -> Result<()> {
     utils::print_cookie_instructions();
-    
+
     // Open browser to auth endpoint
     let auth_url = "https://vrchat.com/api/1/auth";
     println!("Opening: {}", auth_url);
-    
+
     if let Err(e) = open::that(auth_url) {
         println!("Failed to open browser automatically: {}", e);
         println!("Please manually open: {}", auth_url);
@@ -101,7 +108,7 @@ pub async fn login_with_cookie() -> Result<()> {
     // Create client with cookie
     let jar = Arc::new(reqwest::cookie::Jar::default());
     let cookie_header = format!("auth={}", auth_cookie);
-    
+
     jar.set_cookies(
         &mut [HeaderValue::from_str(&cookie_header)
             .map_err(|e| anyhow::anyhow!("Invalid cookie format: {}", e))?]
@@ -123,16 +130,17 @@ pub async fn login_with_cookie() -> Result<()> {
 
     // Attempt cookie authentication
     match apis::authentication_api::get_current_user(&config).await {
-        Ok(response) => {
-            match response {
-                EitherUserOrTwoFactor::CurrentUser(user) => {
-                    handle_successful_login(&user.display_name, "", "", Some(&auth_cookie), None).await?;
-                }
-                EitherUserOrTwoFactor::RequiresTwoFactorAuth(_) => {
-                    return Err(anyhow::anyhow!("Cookie authentication failed - 2FA required but not properly configured"));
-                }
+        Ok(response) => match response {
+            EitherUserOrTwoFactor::CurrentUser(user) => {
+                handle_successful_login(&user.display_name, "", "", Some(&auth_cookie), None)
+                    .await?;
             }
-        }
+            EitherUserOrTwoFactor::RequiresTwoFactorAuth(_) => {
+                return Err(anyhow::anyhow!(
+                    "Cookie authentication failed - 2FA required but not properly configured"
+                ));
+            }
+        },
         Err(e) => {
             let error_msg = format!("{}", e);
             if error_msg.contains("401") || error_msg.contains("Unauthorized") {
@@ -156,20 +164,20 @@ async fn handle_successful_login(
     two_fa_cookie: Option<&str>,
 ) -> Result<()> {
     println!("Authentication successful! Welcome, {}", display_name);
-    
+
     let app_config = if let Some(cookie) = auth_cookie {
         Config::new_cookie(cookie.to_string(), two_fa_cookie.map(|s| s.to_string()))
     } else {
         Config::new_password(username.to_string(), password.to_string())
     };
-    
+
     app_config.save()?;
-    
+
     if auth_cookie.is_some() {
         println!("Cookie saved successfully!");
     } else {
         println!("Credentials saved successfully!");
     }
-    
+
     Ok(())
 }

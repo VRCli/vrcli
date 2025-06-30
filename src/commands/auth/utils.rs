@@ -3,7 +3,9 @@ use anyhow::Result;
 /// Validate cookie format
 pub fn validate_auth_cookie(auth_cookie: &str) -> Result<()> {
     if !auth_cookie.starts_with("authcookie_") {
-        return Err(anyhow::anyhow!("Invalid auth cookie format: must start with 'authcookie_'"));
+        return Err(anyhow::anyhow!(
+            "Invalid auth cookie format: must start with 'authcookie_'"
+        ));
     }
 
     if auth_cookie.len() < 20 {
