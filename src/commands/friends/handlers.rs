@@ -1,19 +1,10 @@
 use anyhow::Result;
 use vrchatapi::apis;
-use crate::common::{formatter::GenericFormatter, output_options::OutputOptions};
+use crate::common::{
+    display_options::DisplayOptions, 
+    command_utils::display_results,
+};
 use super::{fetcher, sorting, table_adapter::FriendTableItem};
-
-/// Configuration for list action display options
-#[derive(Debug, Clone)]
-pub struct ListDisplayOptions {
-    pub long_format: bool,
-    pub show_id: bool,
-    pub show_status: bool,
-    pub show_platform: bool,
-    pub show_location: bool,
-    pub show_activity: bool,
-    pub json: bool,
-}
 
 /// Configuration for list action filter and sort options
 #[derive(Debug, Clone)]
@@ -29,7 +20,7 @@ pub struct ListFilterOptions {
 pub async fn handle_list_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
     filter_options: ListFilterOptions,
-    display_options: ListDisplayOptions,
+    display_options: DisplayOptions,
 ) -> Result<()> {
     let mut all_friends = if filter_options.offline {
         // Fetch offline friends only using parallel processing
@@ -41,15 +32,6 @@ pub async fn handle_list_action(
         // Fetch ALL friends: both online and offline in parallel
         fetcher::fetch_all_friends_parallel(api_config, filter_options.limit).await?
     };
-
-    if all_friends.is_empty() {
-        if display_options.json {
-            println!("[]");
-        } else {
-            println!("No friends found.");
-        }
-        return Ok(());
-    }
 
     // Apply sorting
     if let Some(sort_method_enum) = sorting::SortMethod::from_str(&filter_options.sort_method) {
@@ -71,19 +53,8 @@ pub async fn handle_list_action(
         .map(FriendTableItem::new)
         .collect();
 
-    // Create output options
-    let output_options = OutputOptions {
-        json: display_options.json,
-        long_format: display_options.long_format,
-        show_id: display_options.show_id || display_options.long_format,
-        show_status: display_options.show_status || display_options.long_format,
-        show_platform: display_options.show_platform || display_options.long_format,
-        show_location: display_options.show_location || display_options.long_format,
-        show_activity: display_options.show_activity || display_options.long_format,
-    };
-
-    // Use generic formatter
-    GenericFormatter::format(&table_items, &output_options)
+    // Use common display function
+    display_results(&table_items, &display_options, "No friends found.")
 }
 
 /// Handle the Get action

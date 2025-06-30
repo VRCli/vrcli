@@ -21,6 +21,11 @@ enum Commands {
         #[command(subcommand)]
         action: FriendsAction,
     },
+    /// User operations
+    Users {
+        #[command(subcommand)]
+        action: UsersAction,
+    },
     /// Configure authentication
     Auth {
         #[command(subcommand)]
@@ -121,12 +126,110 @@ enum AuthAction {
     Status,
 }
 
+#[derive(Subcommand)]
+enum UsersAction {
+    /// Search users by display name
+    Search {
+        /// Search query (display name)
+        query: String,
+        /// Number of results to return
+        #[arg(short = 'n', long, default_value = "20")]
+        limit: i32,
+        /// Offset for pagination
+        #[arg(short, long, default_value = "0")]
+        offset: i32,
+        /// Developer type filter (none, internal)
+        #[arg(long)]
+        developer_type: Option<String>,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+        /// Show detailed information
+        #[arg(short = 'l', long)]
+        long: bool,
+    },
+    
+    /// Get user information by ID or display name
+    Get {
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+    },
+    
+    /// Get user by exact username
+    GetByName {
+        /// Exact username to look up
+        username: String,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+    },
+    
+    /// User notes management
+    #[command(subcommand)]
+    Note(NoteAction),
+    
+    /// List all user notes
+    Notes {
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+        /// Show detailed information
+        #[arg(short = 'l', long)]
+        long: bool,
+    },
+    
+    /// Get user feedback
+    Feedback {
+        /// User identifier
+        identifier: String,
+        /// Use direct user ID
+        #[arg(long)]
+        id: bool,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum NoteAction {
+    /// Get note for a user
+    Get {
+        /// User identifier
+        identifier: String,
+        /// Use direct user ID
+        #[arg(long)]
+        id: bool,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+    },
+    
+    /// Set/update note for a user
+    Set {
+        /// User identifier
+        identifier: String,
+        /// Note content
+        note: String,
+        /// Use direct user ID
+        #[arg(long)]
+        id: bool,
+    },
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::Friends { action } => commands::friends::handle_friends_command(action).await,
+        Commands::Users { action } => commands::users::handle_users_command(action).await,
         Commands::Auth { action } => commands::auth::handle_auth_command(action).await,
     }
 }
