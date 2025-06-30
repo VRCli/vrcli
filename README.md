@@ -50,6 +50,10 @@ make dev-setup
 .\scripts\dev.ps1 format    # Windows
 make format                 # Linux/macOS
 
+# Auto-fix common clippy issues
+.\scripts\dev.ps1 fix       # Windows  
+make fix                    # Linux/macOS
+
 # Run all checks
 .\scripts\dev.ps1 check     # Windows
 make check                  # Linux/macOS

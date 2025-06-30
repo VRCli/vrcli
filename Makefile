@@ -14,6 +14,13 @@ check-format:
 clippy:
 	cargo clippy --all-targets --all-features -- -D warnings
 
+# Run clippy with auto-fix
+clippy-fix:
+	cargo clippy --fix --all-targets --all-features -- -D warnings
+
+# Fix common clippy issues automatically
+fix: format clippy-fix
+
 # Run all checks (format + clippy + test)
 check: format clippy test
 

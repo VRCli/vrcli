@@ -21,6 +21,18 @@ function Run-Clippy {
     cargo clippy --all-targets --all-features -- -D warnings
 }
 
+function Fix-Clippy {
+    Write-Host "Running clippy with auto-fix..." -ForegroundColor Yellow
+    cargo clippy --fix --all-targets --all-features -- -D warnings
+}
+
+function Fix-All {
+    Write-Host "Fixing all common issues..." -ForegroundColor Cyan
+    Format-Code
+    Fix-Clippy
+    Write-Host "Auto-fix completed!" -ForegroundColor Green
+}
+
 function Run-Tests {
     Write-Host "Running tests..." -ForegroundColor Yellow
     cargo test --verbose
@@ -85,6 +97,8 @@ function Show-Help {
     Write-Host "  format        - Format code with cargo fmt"
     Write-Host "  check-format  - Check code formatting"
     Write-Host "  clippy        - Run clippy linter"
+    Write-Host "  clippy-fix    - Run clippy with auto-fix"
+    Write-Host "  fix           - Fix all common issues (format + clippy-fix)"
     Write-Host "  test          - Run tests"
     Write-Host "  check         - Run all checks (format + clippy + test)"
     Write-Host "  build         - Build project"
@@ -100,6 +114,8 @@ switch ($Command.ToLower()) {
     "format" { Format-Code }
     "check-format" { Check-Format }
     "clippy" { Run-Clippy }
+    "clippy-fix" { Fix-Clippy }
+    "fix" { Fix-All }
     "test" { Run-Tests }
     "check" { Run-All-Checks }
     "build" { Build-Project }
