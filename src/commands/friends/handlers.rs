@@ -1,6 +1,7 @@
 use anyhow::Result;
 use vrchatapi::apis;
-use super::{fetcher, formatter, utils};
+use crate::common::{formatter::GenericFormatter, output_options::OutputOptions};
+use super::{fetcher, sorting, table_adapter::FriendTableItem};
 
 /// Handle the List action
 pub async fn handle_list_action(
@@ -15,8 +16,10 @@ pub async fn handle_list_action(
     show_location: bool,
     show_activity: bool,
     json: bool, // JSON output format instead of human-readable
+    sort_method: &str,
+    reverse: bool,
 ) -> Result<()> {
-    let all_friends = if offline {
+    let mut all_friends = if offline {
         // Fetch offline friends only using parallel processing
         fetcher::fetch_pages_parallel(api_config, Some(true), limit).await?
     } else if online {
@@ -26,6 +29,7 @@ pub async fn handle_list_action(
         // Fetch ALL friends: both online and offline in parallel
         fetcher::fetch_all_friends_parallel(api_config, limit).await?
     };
+
     if all_friends.is_empty() {
         if json {
             println!("[]");
@@ -35,16 +39,33 @@ pub async fn handle_list_action(
         return Ok(());
     }
 
+    // Apply sorting
+    if let Some(sort_method_enum) = sorting::SortMethod::from_str(sort_method) {
+        sorting::sort_friends(&mut all_friends, sort_method_enum, reverse);
+    } else {
+        eprintln!("Warning: Unknown sort method '{}'. Using default 'name' sorting.", sort_method);
+        eprintln!("Available methods: {}", sorting::SortMethod::all_methods().join(", "));
+        sorting::sort_friends(&mut all_friends, sorting::SortMethod::Name, reverse);
+    }
+
     // JSON output mode
     if json {
-        return formatter::format_friends_json(
-            &all_friends,
-            show_id || long_format,
-            show_status || long_format,
-            show_platform || long_format,
-            show_location || long_format,
-            show_activity || long_format,
-        );
+        let table_items: Vec<FriendTableItem> = all_friends
+            .iter()
+            .map(FriendTableItem::new)
+            .collect();
+
+        let output_options = OutputOptions {
+            json: true,
+            long_format: true,
+            show_id: show_id || long_format,
+            show_status: show_status || long_format,
+            show_platform: show_platform || long_format,
+            show_location: show_location || long_format,
+            show_activity: show_activity || long_format,
+        };
+
+        return GenericFormatter::format_json(&table_items, &output_options);
     }
 
     // Simple list mode (no detailed options)
@@ -58,27 +79,23 @@ pub async fn handle_list_action(
         return Ok(());
     }
 
-    // Tabular format mode with dynamic column widths
-    // Determine which columns to show
-    let show_status_col = show_status || long_format;
-    let show_platform_col = show_platform || long_format;
-    let show_location_col = show_location || long_format;
-    let show_activity_col = show_activity || long_format;
-    let show_id_col = show_id || long_format;
-    
-    // Use dynamic column width formatting
-    let table_output = formatter::format_friends_table(
-        &all_friends,
-        show_id_col,
-        show_status_col,
-        show_platform_col,
-        show_location_col,
-        show_activity_col,
-    );
-    
-    print!("{}", table_output);
-    
-    Ok(())
+    // Tabular format mode with new framework
+    let table_items: Vec<FriendTableItem> = all_friends
+        .iter()
+        .map(FriendTableItem::new)
+        .collect();
+
+    let output_options = OutputOptions {
+        json: false,
+        long_format: true,
+        show_id: show_id || long_format,
+        show_status: show_status || long_format,
+        show_platform: show_platform || long_format,
+        show_location: show_location || long_format,
+        show_activity: show_activity || long_format,
+    };
+
+    GenericFormatter::format_table(&table_items, &output_options)
 }
 
 /// Handle the Get action
@@ -105,7 +122,7 @@ pub async fn handle_add_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
     user_id: &str,
 ) -> Result<()> {
-    if !utils::is_valid_user_id(user_id) {
+    if !crate::common::utils::is_valid_user_id(user_id) {
         return Err(anyhow::anyhow!("Invalid user ID format. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
     }
     
@@ -127,7 +144,7 @@ pub async fn handle_remove_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
     user_id: &str,
 ) -> Result<()> {
-    if !utils::is_valid_user_id(user_id) {
+    if !crate::common::utils::is_valid_user_id(user_id) {
         return Err(anyhow::anyhow!("Invalid user ID format. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
     }
     
@@ -163,7 +180,7 @@ pub async fn handle_status_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
     user_id: &str,
 ) -> Result<()> {
-    if !utils::is_valid_user_id(user_id) {
+    if !crate::common::utils::is_valid_user_id(user_id) {
         return Err(anyhow::anyhow!("Invalid user ID format. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
     }
     

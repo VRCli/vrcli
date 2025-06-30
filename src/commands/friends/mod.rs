@@ -1,7 +1,10 @@
 mod fetcher;
 mod formatter;
 mod handlers;
+mod handlers_v2;
+mod sorting;
 mod utils;
+mod table_adapter;
 
 use crate::auth_client::AuthenticatedClient;
 use crate::FriendsAction;
@@ -23,7 +26,9 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
             show_platform,
             show_location,
             show_activity,
-            json, 
+            json,
+            sort,
+            reverse, 
             all,
             help: _ 
         } => {
@@ -38,7 +43,9 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
                 show_platform || all, // -a shows platform by default
                 show_location || all, // -a shows location by default
                 show_activity || all, // -a shows activity by default
-                json
+                json,
+                &sort,
+                reverse
             ).await
         }
         FriendsAction::Get { username } => {

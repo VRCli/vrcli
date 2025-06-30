@@ -1,6 +1,7 @@
 mod commands;
 mod config;
 mod auth_client;
+mod common;
 
 use clap::{Parser, Subcommand};
 use anyhow::Result;
@@ -65,6 +66,12 @@ enum FriendsAction {
         /// Output in JSON format
         #[arg(long)]
         json: bool,
+        /// Sort method: name, status, activity, platform, id
+        #[arg(short = 's', long, default_value = "name")]
+        sort: String,
+        /// Reverse sort order
+        #[arg(short = 'r', long)]
+        reverse: bool,
         /// Show additional details (status, platform, etc.) [DEPRECATED: use -l instead]
         #[arg(short = 'a', long, hide = true)]
         all: bool,

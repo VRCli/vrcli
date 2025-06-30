@@ -43,14 +43,15 @@ pub async fn fetch_pages_parallel(
         .await?;
     
     // Flatten batches into one Vec<LimitedUserFriend>
-    let mut all = friends_batches.into_iter().flatten().collect::<Vec<_>>();
+    let all = friends_batches.into_iter().flatten().collect::<Vec<_>>();
     
     // If limit was smaller than what we fetched, truncate
+    let mut result = all;
     if let Some(n) = limit {
-        all.truncate(n as usize);
+        result.truncate(n as usize);
     }
-    
-    Ok(all)
+
+    Ok(result)
 }
 
 /// Fetch all friends (both online and offline) in parallel
@@ -83,11 +84,11 @@ pub async fn fetch_all_friends_parallel(
             merged.push(friend);
         }
     }
-    
+
     // Enforce global limit if any
     if let Some(n) = limit {
         merged.truncate(n as usize);
     }
-    
+
     Ok(merged)
 }
