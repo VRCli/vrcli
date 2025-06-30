@@ -87,7 +87,10 @@ pub async fn handle_search_action(
     display_results(
         &user_items,
         &display_options,
-        &format!("No users found for query: {query}", query = search_options.query),
+        &format!(
+            "No users found for query: {query}",
+            query = search_options.query
+        ),
     )
 }
 
