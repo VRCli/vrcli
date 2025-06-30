@@ -14,7 +14,7 @@ pub async fn handle_list_action(
     show_platform: bool,
     show_location: bool,
     show_activity: bool,
-    _human_readable: bool, // Not used in tabular format
+    json: bool, // JSON output format instead of human-readable
 ) -> Result<()> {
     let all_friends = if offline {
         // Fetch offline friends only using parallel processing
@@ -26,9 +26,25 @@ pub async fn handle_list_action(
         // Fetch ALL friends: both online and offline in parallel
         fetcher::fetch_all_friends_parallel(api_config, limit).await?
     };
-      if all_friends.is_empty() {
-        println!("No friends found.");
+    if all_friends.is_empty() {
+        if json {
+            println!("[]");
+        } else {
+            println!("No friends found.");
+        }
         return Ok(());
+    }
+
+    // JSON output mode
+    if json {
+        return formatter::format_friends_json(
+            &all_friends,
+            show_id || long_format,
+            show_status || long_format,
+            show_platform || long_format,
+            show_location || long_format,
+            show_activity || long_format,
+        );
     }
 
     // Simple list mode (no detailed options)
@@ -42,83 +58,25 @@ pub async fn handle_list_action(
         return Ok(());
     }
 
-    // Tabular format mode with fixed-width columns
+    // Tabular format mode with dynamic column widths
     // Determine which columns to show
-    let show_name = true; // Always show name
     let show_status_col = show_status || long_format;
     let show_platform_col = show_platform || long_format;
     let show_location_col = show_location || long_format;
     let show_activity_col = show_activity || long_format;
     let show_id_col = show_id || long_format;
     
-    // Define column widths for proper alignment
-    const NAME_WIDTH: usize = 20;
-    const ID_WIDTH: usize = 32;
-    const STATUS_WIDTH: usize = 10;
-    const PLATFORM_WIDTH: usize = 12;
-    const LOCATION_WIDTH: usize = 18;
-    const ACTIVITY_WIDTH: usize = 20;
+    // Use dynamic column width formatting
+    let table_output = formatter::format_friends_table(
+        &all_friends,
+        show_id_col,
+        show_status_col,
+        show_platform_col,
+        show_location_col,
+        show_activity_col,
+    );
     
-    // Build and print header with proper spacing
-    let mut header_line = String::new();
-    if show_name {
-        header_line.push_str(&format!("{:<width$}", "Name", width = NAME_WIDTH));
-    }
-    if show_id_col {
-        header_line.push_str(&format!("{:<width$}", "ID", width = ID_WIDTH));
-    }
-    if show_status_col {
-        header_line.push_str(&format!("{:<width$}", "Status", width = STATUS_WIDTH));
-    }
-    if show_platform_col {
-        header_line.push_str(&format!("{:<width$}", "Platform", width = PLATFORM_WIDTH));
-    }
-    if show_location_col {
-        header_line.push_str(&format!("{:<width$}", "Location", width = LOCATION_WIDTH));
-    }
-    if show_activity_col {
-        header_line.push_str("Last-Activity");
-    }
-    println!("{}", header_line);
-    
-    // Print data rows with proper column alignment
-    for friend in all_friends {
-        let mut row_line = String::new();
-        
-        if show_name {
-            let name = formatter::format_display_name_fixed(&friend.display_name, NAME_WIDTH);
-            row_line.push_str(&name);
-        }
-        
-        if show_id_col {
-            let id = formatter::format_id_fixed(&friend.id, ID_WIDTH);
-            row_line.push_str(&id);
-        }
-        
-        if show_status_col {
-            let status = formatter::format_user_status_short(&friend.status);
-            let status_fixed = &format!("{:<width$}", status, width = STATUS_WIDTH);
-            row_line.push_str(status_fixed);
-        }
-        
-        if show_platform_col {
-            let platform = formatter::format_platform_fixed(&friend.platform, PLATFORM_WIDTH);
-            row_line.push_str(&platform);
-        }
-        
-        if show_location_col {
-            let location = formatter::format_location_fixed(&friend.location, LOCATION_WIDTH);
-            row_line.push_str(&location);
-        }
-        
-        if show_activity_col {
-            let activity = formatter::format_activity_time(&friend.last_activity);
-            row_line.push_str(&activity);
-        }
-        
-        // Print row with proper column alignment
-        println!("{}", row_line);
-    }
+    print!("{}", table_output);
     
     Ok(())
 }

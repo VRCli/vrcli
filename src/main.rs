@@ -62,9 +62,9 @@ enum FriendsAction {
         /// Show last activity
         #[arg(long)]
         show_activity: bool,
-        /// Use human-readable format with emoji icons
-        #[arg(short = 'h', long)]
-        human_readable: bool,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
         /// Show additional details (status, platform, etc.) [DEPRECATED: use -l instead]
         #[arg(short = 'a', long, hide = true)]
         all: bool,

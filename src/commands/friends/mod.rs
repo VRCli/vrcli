@@ -23,7 +23,7 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
             show_platform,
             show_location,
             show_activity,
-            human_readable, 
+            json, 
             all,
             help: _ 
         } => {
@@ -38,7 +38,7 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
                 show_platform || all, // -a shows platform by default
                 show_location || all, // -a shows location by default
                 show_activity || all, // -a shows activity by default
-                human_readable
+                json
             ).await
         }
         FriendsAction::Get { username } => {
