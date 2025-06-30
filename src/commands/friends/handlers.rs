@@ -60,6 +60,11 @@ pub async fn handle_list_action(
         sorting::sort_friends(&mut all_friends, sorting::SortMethod::Name, filter_options.reverse);
     }
 
+    // Apply limit after sorting to get the correct top N items
+    if let Some(limit) = filter_options.limit {
+        all_friends.truncate(limit as usize);
+    }
+
     // Convert to table items
     let table_items: Vec<FriendTableItem> = all_friends
         .iter()
@@ -84,9 +89,21 @@ pub async fn handle_list_action(
 /// Handle the Get action
 pub async fn handle_get_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
-    username: &str,
+    identifier: &str,
+    use_direct_id: bool,
 ) -> Result<()> {
-    let user = apis::users_api::get_user_by_name(api_config, username).await?;
+    let user_id = if use_direct_id {
+        // Use the identifier as-is (should be a user ID)
+        if !crate::common::utils::is_valid_user_id(identifier) {
+            return Err(anyhow::anyhow!("Invalid user ID format when using --id flag. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
+        }
+        identifier.to_string()
+    } else {
+        // Try to resolve identifier (could be display name or user ID)
+        crate::common::utils::resolve_user_identifier(api_config, identifier).await?
+    };
+    
+    let user = apis::users_api::get_user(api_config, &user_id).await?;
     println!("User: {} ({})", user.display_name, user.id);
     println!("Status: {}", user.status_description);
     if !user.bio.is_empty() {
@@ -103,13 +120,21 @@ pub async fn handle_get_action(
 /// Handle the Add action
 pub async fn handle_add_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
-    user_id: &str,
+    identifier: &str,
+    use_direct_id: bool,
 ) -> Result<()> {
-    if !crate::common::utils::is_valid_user_id(user_id) {
-        return Err(anyhow::anyhow!("Invalid user ID format. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
-    }
+    let user_id = if use_direct_id {
+        // Use the identifier as-is (should be a user ID)
+        if !crate::common::utils::is_valid_user_id(identifier) {
+            return Err(anyhow::anyhow!("Invalid user ID format when using --id flag. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
+        }
+        identifier.to_string()
+    } else {
+        // Try to resolve identifier (could be display name or user ID)
+        crate::common::utils::resolve_user_identifier(api_config, identifier).await?
+    };
     
-    match apis::friends_api::friend(api_config, user_id).await {
+    match apis::friends_api::friend(api_config, &user_id).await {
         Ok(notification) => {
             println!("Friend request sent successfully!");
             println!("Notification ID: {}", notification.id);
@@ -125,24 +150,32 @@ pub async fn handle_add_action(
 /// Handle the Remove action
 pub async fn handle_remove_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
-    user_id: &str,
+    identifier: &str,
+    use_direct_id: bool,
 ) -> Result<()> {
-    if !crate::common::utils::is_valid_user_id(user_id) {
-        return Err(anyhow::anyhow!("Invalid user ID format. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
-    }
+    let user_id = if use_direct_id {
+        // Use the identifier as-is (should be a user ID)
+        if !crate::common::utils::is_valid_user_id(identifier) {
+            return Err(anyhow::anyhow!("Invalid user ID format when using --id flag. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
+        }
+        identifier.to_string()
+    } else {
+        // Try to resolve identifier (could be display name or user ID)
+        crate::common::utils::resolve_user_identifier(api_config, identifier).await?
+    };
     
     // First check if they are a friend or if there's an outgoing request
-    match apis::friends_api::get_friend_status(api_config, user_id).await {
+    match apis::friends_api::get_friend_status(api_config, &user_id).await {
         Ok(status) => {
             if status.is_friend {
                 // Unfriend the user
-                match apis::friends_api::unfriend(api_config, user_id).await {
+                match apis::friends_api::unfriend(api_config, &user_id).await {
                     Ok(_) => println!("Successfully unfriended user {}", user_id),
                     Err(e) => return Err(anyhow::anyhow!("Failed to unfriend user: {}", e)),
                 }
             } else if status.outgoing_request {
                 // Cancel outgoing friend request
-                match apis::friends_api::delete_friend_request(api_config, user_id).await {
+                match apis::friends_api::delete_friend_request(api_config, &user_id).await {
                     Ok(_) => println!("Successfully cancelled friend request to {}", user_id),
                     Err(e) => return Err(anyhow::anyhow!("Failed to cancel friend request: {}", e)),
                 }
@@ -161,13 +194,21 @@ pub async fn handle_remove_action(
 /// Handle the Status action
 pub async fn handle_status_action(
     api_config: &vrchatapi::apis::configuration::Configuration,
-    user_id: &str,
+    identifier: &str,
+    use_direct_id: bool,
 ) -> Result<()> {
-    if !crate::common::utils::is_valid_user_id(user_id) {
-        return Err(anyhow::anyhow!("Invalid user ID format. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
-    }
+    let user_id = if use_direct_id {
+        // Use the identifier as-is (should be a user ID)
+        if !crate::common::utils::is_valid_user_id(identifier) {
+            return Err(anyhow::anyhow!("Invalid user ID format when using --id flag. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
+        }
+        identifier.to_string()
+    } else {
+        // Try to resolve identifier (could be display name or user ID)
+        crate::common::utils::resolve_user_identifier(api_config, identifier).await?
+    };
     
-    match apis::friends_api::get_friend_status(api_config, user_id).await {
+    match apis::friends_api::get_friend_status(api_config, &user_id).await {
         Ok(status) => {
             println!("Friend status with user {}:", user_id);
             println!("  Is friend: {}", status.is_friend);

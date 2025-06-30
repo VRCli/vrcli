@@ -80,13 +80,37 @@ enum FriendsAction {
         help: (),
     },
     /// Get friend details by username
-    Get { username: String },
+    Get { 
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+    },
     /// Send a friend request to a user
-    Add { user_id: String },
+    Add { 
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+    },
     /// Remove a friend or cancel outgoing friend request
-    Remove { user_id: String },
+    Remove { 
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+    },
     /// Check friend status with a user
-    Status { user_id: String },
+    Status { 
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+    },
 }
 
 #[derive(Subcommand)]

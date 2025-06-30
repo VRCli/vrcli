@@ -51,17 +51,17 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
 
             handlers::handle_list_action(api_config, filter_options, display_options).await
         }
-        FriendsAction::Get { username } => {
-            handlers::handle_get_action(api_config, &username).await
+        FriendsAction::Get { identifier, id } => {
+            handlers::handle_get_action(api_config, &identifier, id).await
         }
-        FriendsAction::Add { user_id } => {
-            handlers::handle_add_action(api_config, &user_id).await
+        FriendsAction::Add { identifier, id } => {
+            handlers::handle_add_action(api_config, &identifier, id).await
         }
-        FriendsAction::Remove { user_id } => {
-            handlers::handle_remove_action(api_config, &user_id).await
+        FriendsAction::Remove { identifier, id } => {
+            handlers::handle_remove_action(api_config, &identifier, id).await
         }
-        FriendsAction::Status { user_id } => {
-            handlers::handle_status_action(api_config, &user_id).await
+        FriendsAction::Status { identifier, id } => {
+            handlers::handle_status_action(api_config, &identifier, id).await
         }
     }
 }

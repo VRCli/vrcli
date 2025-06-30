@@ -4,6 +4,7 @@ use futures::stream::{self, StreamExt, TryStreamExt};
 use std::collections::HashSet;
 
 /// Fetch pages of friends in parallel for a specific status (online/offline)
+/// Note: limit is applied after sorting in the caller, not here
 pub async fn fetch_pages_parallel(
     api_config: &vrchatapi::apis::configuration::Configuration,
     offline: Option<bool>,
@@ -11,9 +12,14 @@ pub async fn fetch_pages_parallel(
 ) -> Result<Vec<vrchatapi::models::LimitedUserFriend>> {
     let page_size = 60i32;
     
-    // Compute number of pages up front if we have a limit
+    // Fetch more pages when limit is specified to ensure we have enough data for sorting
+    // The actual limit will be applied after sorting in the handler
     let max_pages = limit
-        .map(|lim| (lim as f32 / page_size as f32).ceil() as usize)
+        .map(|lim| {
+            // Fetch at least 2x the limit to ensure we have enough data for proper sorting
+            let min_pages = ((lim * 2) as f32 / page_size as f32).ceil() as usize;
+            min_pages.max(3) // At least 3 pages to have reasonable data
+        })
         .unwrap_or(20); // Reasonable default max pages to avoid infinite fetching
     
     // Build a stream of page offsets: 0, 60, 120, … up to max_pages
@@ -43,18 +49,14 @@ pub async fn fetch_pages_parallel(
         .await?;
     
     // Flatten batches into one Vec<LimitedUserFriend>
-    let all = friends_batches.into_iter().flatten().collect::<Vec<_>>();
+    let result = friends_batches.into_iter().flatten().collect::<Vec<_>>();
     
-    // If limit was smaller than what we fetched, truncate
-    let mut result = all;
-    if let Some(n) = limit {
-        result.truncate(n as usize);
-    }
-
+    // Don't apply limit here - it will be applied after sorting in the handler
     Ok(result)
 }
 
 /// Fetch all friends (both online and offline) in parallel
+/// Note: limit is applied after sorting in the caller, not here
 pub async fn fetch_all_friends_parallel(
     api_config: &vrchatapi::apis::configuration::Configuration,
     limit: Option<i32>,
@@ -85,10 +87,6 @@ pub async fn fetch_all_friends_parallel(
         }
     }
 
-    // Enforce global limit if any
-    if let Some(n) = limit {
-        merged.truncate(n as usize);
-    }
-
+    // Don't apply limit here - it will be applied after sorting in the handler
     Ok(merged)
 }
