@@ -8,6 +8,7 @@ pub struct UserTableItem {
     pub display_name: String,
     pub username: Option<String>,
     pub status: String,
+    pub status_enum: vrchatapi::models::UserStatus,  // Store original enum for color formatting
     pub last_activity: String,
     pub date_joined: String,
     pub platform: String,
@@ -26,8 +27,16 @@ impl TableDisplayable for UserTableItem {
         Some(self.status.clone())
     }
 
+    fn colored_status(&self) -> Option<String> {
+        Some(crate::common::utils::format_user_status(&self.status_enum, true))
+    }
+
     fn platform(&self) -> Option<&str> {
         Some(&self.platform)
+    }
+
+    fn formatted_platform(&self) -> Option<String> {
+        Some(crate::common::utils::format_platform_short(&self.platform))
     }
 
     fn activity(&self) -> Option<&str> {
@@ -67,11 +76,13 @@ impl TableDisplayable for UserTableItem {
 /// Convert User model to UserTableItem
 impl From<vrchatapi::models::User> for UserTableItem {
     fn from(user: vrchatapi::models::User) -> Self {
+        let status_text = crate::common::utils::format_user_status(&user.status, false);
         UserTableItem {
             id: user.id,
             display_name: user.display_name,
             username: user.username,
-            status: format!("{:?}", user.status),
+            status: status_text,
+            status_enum: user.status,
             last_activity: user.last_activity,
             date_joined: user.date_joined,
             platform: user.last_platform,
@@ -82,11 +93,13 @@ impl From<vrchatapi::models::User> for UserTableItem {
 /// Convert LimitedUserSearch model to UserTableItem
 impl From<vrchatapi::models::LimitedUserSearch> for UserTableItem {
     fn from(user: vrchatapi::models::LimitedUserSearch) -> Self {
+        let status_text = crate::common::utils::format_user_status(&user.status, false);
         UserTableItem {
             id: user.id,
             display_name: user.display_name,
             username: None, // LimitedUserSearch doesn't include username
-            status: format!("{:?}", user.status),
+            status: status_text,
+            status_enum: user.status,
             last_activity: "N/A".to_string(), // Not available in LimitedUserSearch
             date_joined: "N/A".to_string(),   // Not available in LimitedUserSearch
             platform: user.last_platform,

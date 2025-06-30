@@ -52,13 +52,13 @@ pub async fn handle_users_command(action: UsersAction) -> Result<()> {
                 false,  // show_activity
                 json,   // json
             );
-            handlers::handle_get_action(api_config, &identifier, id, display_options).await
+            handlers::handle_get_action(&auth_client, &identifier, id, display_options).await
         }
         UsersAction::GetByName { username, json } => {
             let display_options = DisplayOptions::from_flags(
                 false, false, false, false, false, false, json
             );
-            handlers::handle_get_by_name_action(api_config, &username, display_options).await
+            handlers::handle_get_by_name_action(&auth_client, &username, display_options).await
         }
         UsersAction::Note(note_action) => {
             match note_action {

@@ -2,6 +2,7 @@ use anyhow::Result;
 use crate::common::{
     display_options::DisplayOptions,
     command_utils::display_results,
+    table::TableDisplayable,
 };
 use super::{fetcher, utils, table_adapter::UserTableItem};
 
@@ -12,6 +13,58 @@ pub struct UserSearchOptions {
     pub limit: i32,
     pub offset: i32,
     pub developer_type: Option<String>,
+}
+
+/// Display a single user in Unix-style format (key: value pairs)
+fn display_single_user(
+    user: &UserTableItem, 
+    options: &DisplayOptions,
+    auth_client: &crate::auth_client::AuthenticatedClient,
+) -> Result<()> {
+    if options.json {
+        let json_obj = user.to_json_object(&options.to_output_options());
+        println!("{}", serde_json::to_string_pretty(&json_obj)?);
+        return Ok(());
+    }
+
+    // Basic information always shown
+    println!("Name: {}", user.display_name);
+    
+    if options.show_id {
+        println!("ID: {}", user.id);
+    }
+    
+    if let Some(username) = &user.username {
+        println!("Username: {}", username);
+    }
+    
+    if options.show_status {
+        // Use colored status for better visibility
+        let colored_status = crate::common::utils::format_user_status(&user.status_enum, true);
+        println!("Status: {}", colored_status);
+    }
+    
+    if options.show_platform {
+        let formatted_platform = crate::common::utils::format_platform_short(&user.platform);
+        println!("Platform: {}", formatted_platform);
+    }
+    
+    if options.show_activity {
+        println!("Last Activity: {}", user.last_activity);
+        if user.date_joined != "N/A" {
+            println!("Joined: {}", user.date_joined);
+        }
+    }
+    
+    // Check if this is the current logged-in user
+    if let Some(current_user) = auth_client.current_user() {
+        if user.id == current_user.id {
+            println!("
+* Despite Everything, It's Still You.");
+        }
+    }
+    
+    Ok(())
 }
 
 /// Handle the Search action
@@ -35,11 +88,12 @@ pub async fn handle_search_action(
 
 /// Handle the Get action
 pub async fn handle_get_action(
-    api_config: &vrchatapi::apis::configuration::Configuration,
+    auth_client: &crate::auth_client::AuthenticatedClient,
     identifier: &str,
     use_id: bool,
     display_options: DisplayOptions,
 ) -> Result<()> {
+    let api_config = auth_client.api_config();
     let (resolved_id, is_user_id) = utils::resolve_user_identifier(identifier, use_id);
     
     let user = if is_user_id {
@@ -57,37 +111,36 @@ pub async fn handle_get_action(
         fetcher::fetch_user_by_id(api_config, &matching_user.id).await?
     };
 
-    let user_items = vec![UserTableItem::from(user)];
+    let user_item = UserTableItem::from(user);
 
+    // Create enhanced display options for get command
     let mut detailed_options = display_options.clone();
-    detailed_options.long_format = true; // Always show details for get command
     detailed_options.show_id = true;
     detailed_options.show_status = true;
     detailed_options.show_platform = true;
-    detailed_options.show_location = true;
     detailed_options.show_activity = true;
 
-    display_results(&user_items, &detailed_options, &format!("User not found: {}", identifier))
+    display_single_user(&user_item, &detailed_options, auth_client)
 }
 
 /// Handle the GetByName action
 pub async fn handle_get_by_name_action(
-    api_config: &vrchatapi::apis::configuration::Configuration,
+    auth_client: &crate::auth_client::AuthenticatedClient,
     username: &str,
     display_options: DisplayOptions,
 ) -> Result<()> {
+    let api_config = auth_client.api_config();
     let user = fetcher::fetch_user_by_name(api_config, username).await?;
-    let user_items = vec![UserTableItem::from(user)];
+    let user_item = UserTableItem::from(user);
 
+    // Create enhanced display options for get command
     let mut detailed_options = display_options.clone();
-    detailed_options.long_format = true; // Always show details for get command
     detailed_options.show_id = true;
     detailed_options.show_status = true;
     detailed_options.show_platform = true;
-    detailed_options.show_location = true;
     detailed_options.show_activity = true;
 
-    display_results(&user_items, &detailed_options, &format!("User not found: {}", username))
+    display_single_user(&user_item, &detailed_options, auth_client)
 }
 
 /// Handle the Note Get action

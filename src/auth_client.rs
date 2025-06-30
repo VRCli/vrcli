@@ -37,6 +37,11 @@ impl AuthenticatedClient {
         &self.config
     }
 
+    /// Get the current logged-in user
+    pub fn current_user(&self) -> Option<&vrchatapi::models::CurrentUser> {
+        self.current_user.as_ref()
+    }
+
     /// Configure authentication settings on the API config
     fn configure_auth(
         api_config: &mut apis::configuration::Configuration,
