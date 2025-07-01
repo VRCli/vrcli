@@ -195,7 +195,7 @@ impl ColumnWidths {
 
         // Add padding and set maximum widths
         widths.name = (widths.name + 2).min(30);
-        widths.id = widths.id + 2; // No limit for ID column to ensure full display
+        widths.id += 2; // No limit for ID column to ensure full display
         widths.status = (widths.status + 2).min(15);
         widths.platform = (widths.platform + 2).min(15);
         widths.location = (widths.location + 2).min(40);

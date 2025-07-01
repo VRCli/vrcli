@@ -19,6 +19,3 @@ futures = "0.3"
 unicode-width = "0.1"
 colored = "2.0"
 cargo-husky = "1"
-
-[dev-dependencies]
-cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-clippy"] }
