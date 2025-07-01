@@ -107,8 +107,7 @@ pub fn format_text_with_width(text: &str, width: usize) -> String {
 /// Validate user ID format
 pub fn is_valid_user_id(user_id: &str) -> bool {
     // Modern format: starts with "usr_" followed by UUID-like string
-    if user_id.starts_with("usr_") {
-        let suffix = &user_id[4..];
+    if let Some(suffix) = user_id.strip_prefix("usr_") {
         // Check if suffix looks like a UUID (8-4-4-4-12 format with hyphens)
         return suffix.len() >= 32; // At minimum, should have 32+ characters
     }

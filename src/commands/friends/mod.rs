@@ -20,7 +20,6 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
             online,
             limit,
             offset: _,
-            long,
             show_id,
             show_status,
             show_platform,
@@ -41,8 +40,8 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
             };
 
             let display_options = DisplayOptions::from_flags(
-                long || all, // Backward compatibility: -a maps to -l
-                show_id,
+                all,                  // Backward compatibility: -a remains for legacy support
+                show_id || all,       // -a shows id by default
                 show_status || all,   // -a shows status by default
                 show_platform || all, // -a shows platform by default
                 show_location || all, // -a shows location by default

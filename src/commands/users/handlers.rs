@@ -39,7 +39,7 @@ fn display_single_user(
     // Display bio if it's not empty or "N/A"
     if !user.bio.is_empty() && user.bio != "N/A" {
         let escaped_bio = user.bio.replace('\n', "\\n").replace('\r', "\\r");
-        println!("Bio: {}", escaped_bio);
+        println!("Bio: {escaped_bio}");
     }
 
     if options.show_status {

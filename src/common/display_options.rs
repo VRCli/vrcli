@@ -16,7 +16,7 @@ impl DisplayOptions {
         super::output_options::OutputOptions {
             json: self.json,
             long_format: self.long_format,
-            show_id: self.show_id,
+            show_id: self.show_id || self.long_format, // Always show ID when long format is enabled
             show_status: self.show_status,
             show_platform: self.show_platform,
             show_location: self.show_location,

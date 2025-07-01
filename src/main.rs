@@ -54,9 +54,6 @@ enum FriendsAction {
         /// Offset for pagination
         #[arg(short, long)]
         offset: Option<i32>,
-        /// Long format (detailed view)
-        #[arg(short = 'l', long)]
-        long: bool,
         /// Show user IDs
         #[arg(long)]
         show_id: bool,

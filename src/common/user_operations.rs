@@ -30,9 +30,9 @@ pub async fn fetch_user_by_resolved_id(
         Ok(user) => Ok(user),
         Err(e) => {
             // Enhanced error logging for 404 cases
-            let error_message = format!("{}", e);
+            let error_message = format!("{e}");
             if error_message.contains("404") || error_message.contains("Not Found") {
-                eprintln!("DEBUG: User '{}' not found (404 error)", user_id);
+                eprintln!("DEBUG: User '{user_id}' not found (404 error)");
                 eprintln!("DEBUG: Possible causes:");
                 eprintln!("  1. User ID does not exist");
                 eprintln!("  2. User has privacy settings that hide them");
@@ -40,7 +40,7 @@ pub async fn fetch_user_by_resolved_id(
                 eprintln!("  4. API authentication issue");
                 eprintln!("  5. Rate limiting or temporary API issues");
             } else {
-                eprintln!("DEBUG: Failed to fetch user '{}': {}", user_id, e);
+                eprintln!("DEBUG: Failed to fetch user '{user_id}': {e}");
             }
 
             Err(e.into())
@@ -100,7 +100,7 @@ pub async fn verify_user_access(
             }
         }
         Err(e) => {
-            eprintln!("DEBUG: Authentication verification failed: {:?}", e);
+            eprintln!("DEBUG: Authentication verification failed: {e:?}");
             Err(anyhow::anyhow!("Authentication verification failed: {}", e))
         }
     }
@@ -125,7 +125,7 @@ pub async fn diagnose_user_access_issues(
     identifier: &str,
     use_direct_id: bool,
 ) -> Result<()> {
-    println!("🔍 Diagnosing user access issues for: '{}'", identifier);
+    println!("🔍 Diagnosing user access issues for: '{identifier}'");
     println!("{}", "=".repeat(50));
 
     // Step 1: Verify authentication
@@ -133,7 +133,7 @@ pub async fn diagnose_user_access_issues(
     match verify_user_access(api_config).await {
         Ok(()) => println!("✅ Authentication verification successful"),
         Err(e) => {
-            println!("❌ Authentication verification failed: {}", e);
+            println!("❌ Authentication verification failed: {e}");
             return Err(e);
         }
     }
@@ -142,7 +142,7 @@ pub async fn diagnose_user_access_issues(
     // Step 2: Analyze identifier format
     println!("Step 2: Analyzing identifier format...");
     if crate::common::utils::is_valid_user_id(identifier) {
-        println!("✅ Identifier looks like a valid user ID: {}", identifier);
+        println!("✅ Identifier looks like a valid user ID: {identifier}");
 
         // Step 3: Direct user fetch test
         println!("Step 3: Attempting direct user fetch...");
@@ -155,7 +155,7 @@ pub async fn diagnose_user_access_issues(
                 display_user_simple(&user);
             }
             Err(e) => {
-                println!("❌ Direct user fetch failed: {}", e);
+                println!("❌ Direct user fetch failed: {e}");
                 return Err(e);
             }
         }
@@ -164,16 +164,13 @@ pub async fn diagnose_user_access_issues(
         println!("   Expected format: 'usr_' followed by UUID, or 8-character legacy ID");
         return Err(anyhow::anyhow!("Invalid user ID format"));
     } else {
-        println!(
-            "ℹ️  Identifier appears to be a display name: {}",
-            identifier
-        );
+        println!("ℹ️  Identifier appears to be a display name: {identifier}");
 
         // Step 3: Display name search test
         println!("Step 3: Attempting display name search...");
         match crate::common::utils::resolve_display_name_to_user_id(api_config, identifier).await {
             Ok(user_id) => {
-                println!("✅ Display name resolved to user ID: {}", user_id);
+                println!("✅ Display name resolved to user ID: {user_id}");
 
                 // Step 4: Fetch user by resolved ID
                 println!("Step 4: Fetching user by resolved ID...");
@@ -186,13 +183,13 @@ pub async fn diagnose_user_access_issues(
                         display_user_simple(&user);
                     }
                     Err(e) => {
-                        println!("❌ Failed to fetch user by resolved ID: {}", e);
+                        println!("❌ Failed to fetch user by resolved ID: {e}");
                         return Err(e);
                     }
                 }
             }
             Err(e) => {
-                println!("❌ Display name resolution failed: {}", e);
+                println!("❌ Display name resolution failed: {e}");
                 return Err(e);
             }
         }
