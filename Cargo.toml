@@ -22,3 +22,9 @@ cargo-husky = "1"
 
 [dev-dependencies]
 cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-clippy"] }
+tokio-test = "0.4"
+mockito = "1.0"
+tempfile = "3.0"
+assert_cmd = "2.0"
+predicates = "3.0"
+wiremock = "0.5"

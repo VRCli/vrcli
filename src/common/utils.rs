@@ -209,3 +209,110 @@ pub async fn resolve_user_identifier(
     // Otherwise, try to resolve as display name
     resolve_display_name_to_user_id(api_config, identifier).await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use vrchatapi::models::UserStatus;
+
+    #[test]
+    fn test_format_user_status_without_color() {
+        assert_eq!(format_user_status(&UserStatus::Active, false), "Active");
+        assert_eq!(format_user_status(&UserStatus::JoinMe, false), "Join me");
+        assert_eq!(format_user_status(&UserStatus::AskMe, false), "Ask me");
+        assert_eq!(format_user_status(&UserStatus::Busy, false), "Busy");
+        assert_eq!(format_user_status(&UserStatus::Offline, false), "Offline");
+    }
+
+    #[test]
+    fn test_format_user_status_with_color() {
+        // Test that colored output contains the expected text
+        // Note: We can't easily test the actual colors without complex string parsing
+        let active_colored = format_user_status(&UserStatus::Active, true);
+        assert!(active_colored.contains("Active"));
+
+        let busy_colored = format_user_status(&UserStatus::Busy, true);
+        assert!(busy_colored.contains("Busy"));
+    }
+
+    #[test]
+    fn test_format_platform_short() {
+        assert_eq!(format_platform_short("standalonewindows"), "PC");
+        assert_eq!(format_platform_short("android"), "Quest");
+        assert_eq!(format_platform_short("quest"), "Quest");
+        assert_eq!(format_platform_short("ios"), "iOS");
+        assert_eq!(format_platform_short("steamvr"), "SteamVR");
+        assert_eq!(format_platform_short("oculuspc"), "Oculus");
+        assert_eq!(format_platform_short("unknownplatform"), "Unknown");
+        assert_eq!(format_platform_short(""), "Unknown");
+    }
+
+    #[test]
+    fn test_format_platform_unity_versions() {
+        assert_eq!(format_platform_short("2019.4.31f1"), "Unity2019");
+        assert_eq!(format_platform_short("2022.3.22f1"), "Unity2022");
+        assert_eq!(format_platform_short("2024.1.0f1"), "Unity2024");
+    }
+
+    #[test]
+    fn test_format_platform_long_strings() {
+        assert_eq!(format_platform_short("verylongplatformname"), "veryl...");
+        assert_eq!(format_platform_short("12345678"), "12345678");
+        assert_eq!(format_platform_short("123456789"), "12345...");
+    }
+
+    #[test]
+    fn test_format_text_with_width_exact_fit() {
+        assert_eq!(format_text_with_width("hello", 5), "hello");
+    }
+
+    #[test]
+    fn test_format_text_with_width_padding() {
+        assert_eq!(format_text_with_width("hi", 5), "hi   ");
+    }
+
+    #[test]
+    fn test_format_text_with_width_truncation() {
+        assert_eq!(format_text_with_width("hello world", 8), "hello...");
+        assert_eq!(format_text_with_width("test", 8), "test    ");
+    }
+
+    #[test]
+    fn test_format_text_with_width_unicode() {
+        // Test with Japanese characters (wider Unicode characters)
+        // Japanese characters have width 2, so "こんにちは" (5 chars) = width 10
+        // With width 6, we can fit "こん" (width 4) + "..." (width 3) = "こん..." (width 7)
+        // But need to pad to exact width 6, so result should be "こ..." (width 4) + " " (2 spaces)
+        assert_eq!(format_text_with_width("こんにちは", 6), "こ... ");
+    }
+
+    #[test]
+    fn test_is_valid_user_id_modern_format() {
+        assert!(is_valid_user_id("usr_12345678-1234-1234-1234-123456789012"));
+        assert!(is_valid_user_id("usr_abcdef12-3456-7890-abcd-ef1234567890"));
+        assert!(!is_valid_user_id("usr_short"));
+        assert!(!is_valid_user_id("usr_"));
+    }
+
+    #[test]
+    fn test_is_valid_user_id_legacy_format() {
+        assert!(is_valid_user_id("Abc123Xy")); // 8 chars, mixed case with numbers
+        assert!(is_valid_user_id("Test1234")); // 8 chars, mixed case with numbers
+        assert!(!is_valid_user_id("Nekomasu")); // 8 chars but no digits
+        assert!(!is_valid_user_id("12345678")); // 8 chars but no letters
+        assert!(!is_valid_user_id("testname")); // 8 chars but no digits or uppercase
+    }
+
+    #[test]
+    fn test_is_valid_user_id_invalid_formats() {
+        assert!(!is_valid_user_id(""));
+        assert!(!is_valid_user_id("invalid"));
+        assert!(!is_valid_user_id("toolong123456789"));
+        assert!(!is_valid_user_id("short"));
+        assert!(!is_valid_user_id("special@chars"));
+    }
+
+    // Note: resolve_display_name_to_user_id and resolve_user_identifier
+    // require async API calls and will be tested in integration tests
+    // with mocked responses
+}

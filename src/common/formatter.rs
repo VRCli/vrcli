@@ -58,3 +58,128 @@ impl GenericFormatter {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::common::output_options::OutputOptions;
+
+    // Mock struct for testing TableDisplayable
+    #[derive(Debug)]
+    struct MockItem {
+        name: String,
+        value: String,
+    }
+
+    impl TableDisplayable for MockItem {
+        fn display_name(&self) -> &str {
+            &self.name
+        }
+
+        fn to_json_object(&self, _options: &OutputOptions) -> serde_json::Value {
+            serde_json::json!({
+                "name": self.name,
+                "value": self.value
+            })
+        }
+    }
+
+    #[test]
+    fn test_format_empty_items_json() {
+        let items: Vec<MockItem> = vec![];
+        let options = OutputOptions {
+            json: true,
+            long_format: false,
+            show_id: false,
+            show_status: false,
+            show_platform: false,
+            show_location: false,
+            show_activity: false,
+        };
+
+        // This would normally print to stdout, so we can't easily test the output
+        // In a real scenario, you might want to refactor to return strings instead of printing
+        let result = GenericFormatter::format(&items, &options);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_format_empty_items_table() {
+        let items: Vec<MockItem> = vec![];
+        let options = OutputOptions {
+            json: false,
+            long_format: false,
+            show_id: false,
+            show_status: false,
+            show_platform: false,
+            show_location: false,
+            show_activity: false,
+        };
+
+        let result = GenericFormatter::format(&items, &options);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_format_json_items() {
+        let items = vec![
+            MockItem {
+                name: "test1".to_string(),
+                value: "value1".to_string(),
+            },
+            MockItem {
+                name: "test2".to_string(),
+                value: "value2".to_string(),
+            },
+        ];
+        let options = OutputOptions {
+            json: true,
+            long_format: false,
+            show_id: false,
+            show_status: false,
+            show_platform: false,
+            show_location: false,
+            show_activity: false,
+        };
+
+        let result = GenericFormatter::format_json(&items, &options);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_format_simple_list() {
+        let items = vec![
+            MockItem {
+                name: "test1".to_string(),
+                value: "value1".to_string(),
+            },
+            MockItem {
+                name: "test2".to_string(),
+                value: "value2".to_string(),
+            },
+        ];
+
+        let result = GenericFormatter::format_simple_list(&items);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_format_table() {
+        let items = vec![MockItem {
+            name: "test1".to_string(),
+            value: "value1".to_string(),
+        }];
+        let options = OutputOptions {
+            json: false,
+            long_format: true,
+            show_id: false,
+            show_status: false,
+            show_platform: false,
+            show_location: false,
+            show_activity: false,
+        };
+
+        let result = GenericFormatter::format_table(&items, &options);
+        assert!(result.is_ok());
+    }
+}
