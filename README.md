@@ -54,20 +54,20 @@ cargo install --path .
 
 ### Authentication (`vrcli auth`)
 
-| Command | Description |
-|---------|-------------|
-| `login` | Interactive login with password or authcookie_ |
+| Command  | Description                                      |
+| -------- | ------------------------------------------------ |
+| `login`  | Interactive login with password or authcookie_   |
 | `status` | Show current authentication status and user info |
 
 ### Friends Management (`vrcli friends`)
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `list` | List all friends with filtering and sorting | `vrcli friends list --online --sort status` |
-| `get <identifier>` | Get detailed friend information | `vrcli friends get "username"` |
-| `add <identifier>` | Send a friend request | `vrcli friends add "username"` |
-| `remove <identifier>` | Remove friend or cancel request | `vrcli friends remove "username"` |
-| `status <identifier>` | Check friendship status | `vrcli friends status "username"` |
+| Command               | Description                                 | Example                                     |
+| --------------------- | ------------------------------------------- | ------------------------------------------- |
+| `list`                | List all friends with filtering and sorting | `vrcli friends list --online --sort status` |
+| `get <identifier>`    | Get detailed friend information             | `vrcli friends get "username"`              |
+| `add <identifier>`    | Send a friend request                       | `vrcli friends add "username"`              |
+| `remove <identifier>` | Remove friend or cancel request             | `vrcli friends remove "username"`           |
+| `status <identifier>` | Check friendship status                     | `vrcli friends status "username"`           |
 
 #### Friends List Options
 - `--online` / `--offline`: Filter by online status
@@ -79,22 +79,22 @@ cargo install --path .
 
 ### User Operations (`vrcli users`)
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `search <query>` | Search users by display name | `vrcli users search "partial name"` |
-| `get <identifier>` | Get user information by ID or name | `vrcli users get "username"` |
-| `get-by-name <username>` | Get user by exact username | `vrcli users get-by-name "exact_username"` |
-| `note get <identifier>` | Get your note for a user | `vrcli users note get "username"` |
-| `note set <identifier> <note>` | Set/update note for a user | `vrcli users note set "username" "My note"` |
-| `notes` | List all your user notes | `vrcli users notes` |
-| `feedback <identifier>` | Get feedback/moderation info | `vrcli users feedback "username"` |
-| `diagnose <identifier>` | Troubleshoot user access issues | `vrcli users diagnose "username"` |
+| Command                        | Description                        | Example                                     |
+| ------------------------------ | ---------------------------------- | ------------------------------------------- |
+| `search <query>`               | Search users by display name       | `vrcli users search "partial name"`         |
+| `get <identifier>`             | Get user information by ID or name | `vrcli users get "username"`                |
+| `get-by-name <username>`       | Get user by exact username         | `vrcli users get-by-name "exact_username"`  |
+| `note get <identifier>`        | Get your note for a user           | `vrcli users note get "username"`           |
+| `note set <identifier> <note>` | Set/update note for a user         | `vrcli users note set "username" "My note"` |
+| `notes`                        | List all your user notes           | `vrcli users notes`                         |
+| `feedback <identifier>`        | Get feedback/moderation info       | `vrcli users feedback "username"`           |
+| `diagnose <identifier>`        | Troubleshoot user access issues    | `vrcli users diagnose "username"`           |
 
 ### World Discovery (`vrcli worlds`)
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `search <query>` | Search worlds by name | `vrcli worlds search "avatar world"` |
+| Command          | Description                    | Example                                                        |
+| ---------------- | ------------------------------ | -------------------------------------------------------------- |
+| `search <query>` | Search worlds by name          | `vrcli worlds search "avatar world"`                           |
 | `get <world_id>` | Get detailed world information | `vrcli worlds get "wrld_12345678-1234-1234-1234-123456789012"` |
 
 #### World Search Options
@@ -169,14 +169,86 @@ vrcli auth status
 
 ## Development
 
-### Quick Setup
-```bash
-# Windows (PowerShell)
-.\scripts\dev.ps1 setup-hooks
+### Setting Up the Development Environment
 
-# Linux/macOS
-make dev-setup
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/VRCli/vrcli
+   cd vrcli
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   cargo build
+   ```
+
+3. **Set up pre-commit hooks** (optional but recommended):
+   ```bash
+   cargo install cargo-husky
+   ```
+
+### Local Development Commands
+
+To ensure your code passes CI checks before pushing, use these commands:
+
+**Run the exact same checks as CI** (recommended before each commit):
+```bash
+# Cross-platform (Make)
+make ci-local
+
+# Windows PowerShell
+.\scripts\dev.ps1 ci-local
+
+# Manual commands
+cargo fmt --all
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test --verbose
 ```
+
+**Individual checks**:
+```bash
+# Format code
+cargo fmt --all
+
+# Run clippy (same as CI)
+cargo clippy --all-targets --all-features -- -D warnings
+
+# Run clippy with auto-fix
+cargo clippy --fix --all-targets --all-features -- -D warnings
+
+# Run tests
+cargo test --verbose
+```
+
+**Auto-fix common issues**:
+```bash
+make fix  # or .\scripts\dev.ps1 fix
+```
+
+### VS Code Setup
+
+The repository includes VS Code settings that:
+- Enable Clippy on save with the same strictness as CI
+- Auto-format code on save
+- Show Clippy warnings inline as you type
+
+Make sure you have the `rust-analyzer` extension installed.
+
+### Pre-commit Hooks
+
+The project uses `cargo-husky` to run the same Clippy checks locally before each commit. This prevents CI failures due to linting issues.
+
+If you want to bypass the pre-commit hook temporarily:
+```bash
+git commit --no-verify -m "your message"
+```
+
+### CI Consistency
+
+The project is configured to ensure local and CI environments behave identically:
+- `clippy.toml` enforces consistent linting rules
+- VS Code settings match CI Clippy configuration
+- `make ci-local` runs the exact same commands as GitHub Actions
 
 ### Development Workflow
 

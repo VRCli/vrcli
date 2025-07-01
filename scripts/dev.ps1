@@ -48,12 +48,28 @@ function Run-All-Checks {
 
 function Run-CI-Local {
     Write-Host "Running CI workflow locally (same as GitHub Actions)..." -ForegroundColor Cyan
+    
     Write-Host "Step 1: Format code" -ForegroundColor Yellow
     cargo fmt --all
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Format check failed!" -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
+    
     Write-Host "Step 2: Run clippy" -ForegroundColor Yellow
     cargo clippy --all-targets --all-features -- -D warnings
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Clippy checks failed!" -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
+    
     Write-Host "Step 3: Run tests" -ForegroundColor Yellow
     cargo test --verbose
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Tests failed!" -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
+    
     Write-Host "Local CI checks completed successfully!" -ForegroundColor Green
 }
 
@@ -130,6 +146,7 @@ switch ($Command.ToLower()) {
     "fix" { Fix-All }
     "test" { Run-Tests }
     "check" { Run-All-Checks }
+    "ci-local" { Run-CI-Local }
     "build" { Build-Project }
     "build-release" { Build-Release }
     "clean" { Clean-Project }

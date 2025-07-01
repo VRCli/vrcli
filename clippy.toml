@@ -1,0 +1,14 @@
+# Clippy configuration for vrcli
+# This ensures consistent linting behavior between local development and CI
+
+# Deny warnings to make clippy more strict
+warn-on-all-wildcard-imports = true
+disallowed-methods = []
+disallowed-types = []
+disallowed-macros = []
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 30
+
+# Documentation requirements
+missing-docs-in-crate-items = false
