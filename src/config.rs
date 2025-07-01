@@ -182,8 +182,8 @@ mod tests {
         // We'll test that it either succeeds or fails with the expected error message
         let result = Config::load();
 
-        if result.is_err() {
-            let error_msg = result.unwrap_err().to_string();
+        if let Err(error) = result {
+            let error_msg = error.to_string();
             assert!(
                 error_msg.contains("Config file not found")
                     || error_msg.contains("Could not find config directory")
