@@ -23,7 +23,7 @@ function Run-Clippy {
 
 function Fix-Clippy {
     Write-Host "Running clippy with auto-fix..." -ForegroundColor Yellow
-    cargo clippy --fix --all-targets --all-features -- -D warnings
+    cargo clippy --fix --allow-dirty --all-targets --all-features -- -D warnings
 }
 
 function Fix-All {

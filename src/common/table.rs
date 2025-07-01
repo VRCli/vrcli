@@ -135,6 +135,12 @@ pub struct ColumnWidths {
     pub location: usize,
 }
 
+impl Default for ColumnWidths {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ColumnWidths {
     /// Create new column widths with minimum sizes
     pub fn new() -> Self {

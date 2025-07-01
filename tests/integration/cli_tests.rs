@@ -25,7 +25,7 @@ fn test_cli_version() {
 #[test]
 fn test_friends_help() {
     let mut cmd = Command::cargo_bin("vrcli").unwrap();
-    cmd.args(&["friends", "--help"]);
+    cmd.args(["friends", "--help"]);
 
     cmd.assert()
         .success()
@@ -35,7 +35,7 @@ fn test_friends_help() {
 #[test]
 fn test_auth_help() {
     let mut cmd = Command::cargo_bin("vrcli").unwrap();
-    cmd.args(&["auth", "--help"]);
+    cmd.args(["auth", "--help"]);
 
     cmd.assert()
         .success()
@@ -45,7 +45,7 @@ fn test_auth_help() {
 #[test]
 fn test_users_help() {
     let mut cmd = Command::cargo_bin("vrcli").unwrap();
-    cmd.args(&["users", "--help"]);
+    cmd.args(["users", "--help"]);
 
     cmd.assert()
         .success()
@@ -55,7 +55,7 @@ fn test_users_help() {
 #[test]
 fn test_worlds_help() {
     let mut cmd = Command::cargo_bin("vrcli").unwrap();
-    cmd.args(&["worlds", "--help"]);
+    cmd.args(["worlds", "--help"]);
 
     cmd.assert()
         .success()
