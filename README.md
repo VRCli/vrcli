@@ -19,7 +19,7 @@ A command-line interface for the VRChat API that lets you manage friends, users,
 
 ### From Source
 ```bash
-git clone <repository-url>
+git clone https://github.com/VRCli/vrcli
 cd vrcli
 cargo install --path .
 ```
