@@ -4,6 +4,12 @@
 
 # vrcli
 
+<div align="center">
+
+[![Crates.io](https://img.shields.io/crates/v/vrcli.svg)](https://crates.io/crates/vrcli) [![Downloads](https://img.shields.io/crates/d/vrcli.svg)](https://crates.io/crates/vrcli) [![License](https://img.shields.io/crates/l/vrcli.svg)](LICENSE) [![CI](https://github.com/VRCli/vrcli/workflows/CI/badge.svg)](https://github.com/VRCli/vrcli/actions) [![Rust Version](https://img.shields.io/badge/rustc-1.70+-blue.svg)](https://forge.rust-lang.org/infra/channel-releases.html)
+
+</div>
+
 A command-line interface for the VRChat API that lets you manage friends, users, worlds, and authentication directly from your terminal.
 
 ## Features
