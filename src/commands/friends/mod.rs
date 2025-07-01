@@ -52,9 +52,11 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
 
             handlers::handle_list_action(api_config, filter_options, display_options).await
         }
-        FriendsAction::Get { identifier, id, json } => {
-            handlers::handle_get_action(api_config, &identifier, id, json).await
-        }
+        FriendsAction::Get {
+            identifier,
+            id,
+            json,
+        } => handlers::handle_get_action(api_config, &identifier, id, json).await,
         FriendsAction::Add { identifier, id } => {
             handlers::handle_add_action(api_config, &identifier, id).await
         }

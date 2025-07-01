@@ -225,19 +225,35 @@ pub fn format_table<T: TableDisplayable>(
 
     // Build header
     let mut header = String::new();
-    header.push_str(&format!("{:<width$}", column_names.name, width = widths.name));
+    header.push_str(&format!(
+        "{:<width$}",
+        column_names.name,
+        width = widths.name
+    ));
 
     if options.show_id {
         header.push_str(&format!("{:<width$}", column_names.id, width = widths.id));
     }
     if options.show_status {
-        header.push_str(&format!("{:<width$}", column_names.status, width = widths.status));
+        header.push_str(&format!(
+            "{:<width$}",
+            column_names.status,
+            width = widths.status
+        ));
     }
     if options.show_platform {
-        header.push_str(&format!("{:<width$}", column_names.platform, width = widths.platform));
+        header.push_str(&format!(
+            "{:<width$}",
+            column_names.platform,
+            width = widths.platform
+        ));
     }
     if options.show_location {
-        header.push_str(&format!("{:<width$}", column_names.location, width = widths.location));
+        header.push_str(&format!(
+            "{:<width$}",
+            column_names.location,
+            width = widths.location
+        ));
     }
     if options.show_activity {
         header.push_str(column_names.activity);

@@ -108,14 +108,13 @@ pub async fn handle_get_action(
     display_options: DisplayOptions,
 ) -> Result<()> {
     let api_config = auth_client.api_config();
-    
+
     // Use common user resolution and fetching
-    let user_id = crate::common::user_operations::resolve_user_identifier(
-        api_config, identifier, use_id
-    ).await?;
-    let user = crate::common::user_operations::fetch_user_by_resolved_id(
-        api_config, &user_id
-    ).await?;
+    let user_id =
+        crate::common::user_operations::resolve_user_identifier(api_config, identifier, use_id)
+            .await?;
+    let user =
+        crate::common::user_operations::fetch_user_by_resolved_id(api_config, &user_id).await?;
 
     // Convert to table item and display with enhanced options
     let user_item = UserTableItem::from(user);

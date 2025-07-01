@@ -72,10 +72,10 @@ pub async fn handle_get_action(
     use crate::commands::users::handlers;
     use crate::common::auth_client::AuthenticatedClient;
     use crate::common::display_options::DisplayOptions;
-    
+
     let auth_client = AuthenticatedClient::new().await?;
     let display_options = DisplayOptions::from_flags(
-        false, // long_format 
+        false, // long_format
         false, // show_id
         false, // show_status
         false, // show_platform
@@ -83,7 +83,7 @@ pub async fn handle_get_action(
         false, // show_activity
         json,  // json
     );
-    
+
     handlers::handle_get_action(&auth_client, identifier, use_direct_id, display_options).await
 }
 
@@ -94,8 +94,11 @@ pub async fn handle_add_action(
     use_direct_id: bool,
 ) -> Result<()> {
     let user_id = crate::common::user_operations::resolve_user_identifier(
-        api_config, identifier, use_direct_id
-    ).await?;
+        api_config,
+        identifier,
+        use_direct_id,
+    )
+    .await?;
 
     match apis::friends_api::friend(api_config, &user_id).await {
         Ok(notification) => {
@@ -117,8 +120,11 @@ pub async fn handle_remove_action(
     use_direct_id: bool,
 ) -> Result<()> {
     let user_id = crate::common::user_operations::resolve_user_identifier(
-        api_config, identifier, use_direct_id
-    ).await?;
+        api_config,
+        identifier,
+        use_direct_id,
+    )
+    .await?;
 
     // First check if they are a friend or if there's an outgoing request
     match apis::friends_api::get_friend_status(api_config, &user_id).await {
@@ -156,8 +162,11 @@ pub async fn handle_status_action(
     use_direct_id: bool,
 ) -> Result<()> {
     let user_id = crate::common::user_operations::resolve_user_identifier(
-        api_config, identifier, use_direct_id
-    ).await?;
+        api_config,
+        identifier,
+        use_direct_id,
+    )
+    .await?;
 
     match apis::friends_api::get_friend_status(api_config, &user_id).await {
         Ok(status) => {

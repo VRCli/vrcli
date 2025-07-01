@@ -112,7 +112,7 @@ pub fn is_valid_user_id(user_id: &str) -> bool {
         // Check if suffix looks like a UUID (8-4-4-4-12 format with hyphens)
         return suffix.len() >= 32; // At minimum, should have 32+ characters
     }
-    
+
     // Legacy format: exactly 8 characters, alphanumeric
     // But be more strict - legacy IDs are typically random-looking combinations
     // Exclude common words that might be display names
@@ -121,18 +121,18 @@ pub fn is_valid_user_id(user_id: &str) -> bool {
         if !is_alphanumeric {
             return false;
         }
-        
+
         // Additional check: legacy user IDs typically contain both letters and numbers
         // and are case-sensitive with mixed case
         let has_digit = user_id.chars().any(|c| c.is_ascii_digit());
         let has_upper = user_id.chars().any(|c| c.is_ascii_uppercase());
         let has_lower = user_id.chars().any(|c| c.is_ascii_lowercase());
-        
+
         // Legacy IDs usually have a mix of cases and contain numbers
         // "Nekomasu" would fail this test (no digits, no lowercase)
         return has_digit && (has_upper || has_lower);
     }
-    
+
     false
 }
 
@@ -150,12 +150,14 @@ pub async fn resolve_display_name_to_user_id(
         Some(10), // limit to 10 results
         None,     // offset
     )
-    .await {
+    .await
+    {
         Ok(results) => results,
         Err(e) => {
             return Err(anyhow::anyhow!(
                 "Failed to search for user '{}': {}",
-                display_name, e
+                display_name,
+                e
             ));
         }
     };

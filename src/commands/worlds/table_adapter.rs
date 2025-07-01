@@ -1,5 +1,5 @@
 use crate::common::output_options::OutputOptions;
-use crate::common::table::{TableDisplayable, TableColumnNames};
+use crate::common::table::{TableColumnNames, TableDisplayable};
 use crate::common::world_tags;
 use serde_json::{Map, Value};
 
@@ -77,7 +77,7 @@ impl TableDisplayable for WorldTableItem {
     fn column_names(&self) -> TableColumnNames {
         TableColumnNames {
             name: "Name",
-            id: "ID", 
+            id: "ID",
             status: "Author",
             platform: "Capacity",
             location: "Tags",
@@ -90,18 +90,36 @@ impl TableDisplayable for WorldTableItem {
 
         // Always include basic info
         map.insert("name".to_string(), Value::String(self.name.clone()));
-        map.insert("author_name".to_string(), Value::String(self.author_name.clone()));
+        map.insert(
+            "author_name".to_string(),
+            Value::String(self.author_name.clone()),
+        );
         map.insert("capacity".to_string(), Value::Number(self.capacity.into()));
 
         // If JSON output is requested, include all columns
         if options.json {
             map.insert("id".to_string(), Value::String(self.id.clone()));
-            map.insert("author_id".to_string(), Value::String(self.author_id.clone()));
-            map.insert("description".to_string(), Value::String(self.description.clone()));
+            map.insert(
+                "author_id".to_string(),
+                Value::String(self.author_id.clone()),
+            );
+            map.insert(
+                "description".to_string(),
+                Value::String(self.description.clone()),
+            );
             map.insert("visits".to_string(), Value::Number(self.visits.into()));
-            map.insert("favorites".to_string(), Value::Number(self.favorites.into()));
-            map.insert("created_at".to_string(), Value::String(self.created_at.clone()));
-            map.insert("updated_at".to_string(), Value::String(self.updated_at.clone()));
+            map.insert(
+                "favorites".to_string(),
+                Value::Number(self.favorites.into()),
+            );
+            map.insert(
+                "created_at".to_string(),
+                Value::String(self.created_at.clone()),
+            );
+            map.insert(
+                "updated_at".to_string(),
+                Value::String(self.updated_at.clone()),
+            );
             map.insert(
                 "tags".to_string(),
                 Value::Array(self.tags.iter().map(|t| Value::String(t.clone())).collect()),
@@ -109,15 +127,30 @@ impl TableDisplayable for WorldTableItem {
         } else {
             if options.show_id {
                 map.insert("id".to_string(), Value::String(self.id.clone()));
-                map.insert("author_id".to_string(), Value::String(self.author_id.clone()));
+                map.insert(
+                    "author_id".to_string(),
+                    Value::String(self.author_id.clone()),
+                );
             }
 
             if options.long_format {
-                map.insert("description".to_string(), Value::String(self.description.clone()));
+                map.insert(
+                    "description".to_string(),
+                    Value::String(self.description.clone()),
+                );
                 map.insert("visits".to_string(), Value::Number(self.visits.into()));
-                map.insert("favorites".to_string(), Value::Number(self.favorites.into()));
-                map.insert("created_at".to_string(), Value::String(self.created_at.clone()));
-                map.insert("updated_at".to_string(), Value::String(self.updated_at.clone()));
+                map.insert(
+                    "favorites".to_string(),
+                    Value::Number(self.favorites.into()),
+                );
+                map.insert(
+                    "created_at".to_string(),
+                    Value::String(self.created_at.clone()),
+                );
+                map.insert(
+                    "updated_at".to_string(),
+                    Value::String(self.updated_at.clone()),
+                );
             }
 
             if options.show_location {
@@ -140,7 +173,7 @@ impl From<vrchatapi::models::LimitedWorld> for WorldTableItem {
         } else {
             (0, false)
         };
-        
+
         WorldTableItem {
             id: world.id,
             name: world.name,

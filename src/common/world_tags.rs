@@ -6,10 +6,7 @@ pub fn format_world_tags(tags: &[String]) -> String {
         return "None".to_string();
     }
 
-    let formatted_tags: Vec<String> = tags
-        .iter()
-        .map(|tag| format_single_tag(tag))
-        .collect();
+    let formatted_tags: Vec<String> = tags.iter().map(|tag| format_single_tag(tag)).collect();
 
     formatted_tags.join(", ")
 }
@@ -18,7 +15,7 @@ pub fn format_world_tags(tags: &[String]) -> String {
 fn format_single_tag(tag: &str) -> String {
     // Create a mapping for common tag patterns
     let tag_mappings = get_tag_mappings();
-    
+
     // Check for exact matches first
     if let Some(formatted) = tag_mappings.get(tag) {
         return formatted.to_string();
@@ -28,23 +25,23 @@ fn format_single_tag(tag: &str) -> String {
     if let Some(suffix) = tag.strip_prefix("author_tag_") {
         return format!("📝 {}", format_author_tag(suffix));
     }
-    
+
     if let Some(suffix) = tag.strip_prefix("feature_") {
         return format!("⚙️ {}", format_feature_tag(suffix));
     }
-    
+
     if let Some(suffix) = tag.strip_prefix("content_") {
         return format!("📋 {}", format_content_tag(suffix));
     }
-    
+
     if let Some(suffix) = tag.strip_prefix("lang_") {
         return format!("🌐 {}", format_language_tag(suffix));
     }
-    
+
     if let Some(suffix) = tag.strip_prefix("system_") {
         return format!("🔧 {}", format_system_tag(suffix));
     }
-    
+
     if let Some(suffix) = tag.strip_prefix("admin_") {
         return format!("👷 {}", format_admin_tag(suffix));
     }
@@ -56,22 +53,22 @@ fn format_single_tag(tag: &str) -> String {
 /// Get mapping for common exact tag matches
 fn get_tag_mappings() -> HashMap<&'static str, &'static str> {
     let mut mappings = HashMap::new();
-    
+
     // Status tags
     mappings.insert("system_approved", "✅ System Approved");
-    
+
     // Platform tags
     mappings.insert("android_supported", "📱 Android");
     mappings.insert("ios_supported", "📱 iOS");
     mappings.insert("pc_supported", "🖥️ PC");
     mappings.insert("quest_supported", "🥽 Quest");
-    
+
     // Content warnings
     mappings.insert("content_horror", "⚠️ Horror");
     mappings.insert("content_violence", "⚠️ Violence");
     mappings.insert("content_gore", "⚠️ Gore");
     mappings.insert("content_adult", "🔞 Adult Content");
-    
+
     mappings
 }
 
@@ -188,14 +185,23 @@ mod tests {
     #[test]
     fn test_format_feature_tags() {
         assert_eq!(format_single_tag("feature_drones_disabled"), "⚙️ No Drones");
-        assert_eq!(format_single_tag("feature_mirror_disabled"), "⚙️ No Mirrors");
+        assert_eq!(
+            format_single_tag("feature_mirror_disabled"),
+            "⚙️ No Mirrors"
+        );
     }
 
     #[test]
     fn test_format_admin_tags() {
-        assert_eq!(format_single_tag("admin_vrrat_community_takeover"), "👷 VRRat Community Takeover");
+        assert_eq!(
+            format_single_tag("admin_vrrat_community_takeover"),
+            "👷 VRRat Community Takeover"
+        );
         assert_eq!(format_single_tag("admin_staff_pick"), "👷 Staff Pick");
-        assert_eq!(format_single_tag("admin_verified_creator"), "👷 Verified Creator");
+        assert_eq!(
+            format_single_tag("admin_verified_creator"),
+            "👷 Verified Creator"
+        );
     }
 
     #[test]

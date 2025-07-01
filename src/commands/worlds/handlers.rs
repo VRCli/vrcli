@@ -1,5 +1,8 @@
 use super::{fetcher, table_adapter::WorldTableItem};
-use crate::common::{command_utils::display_results, display_options::DisplayOptions, table::TableDisplayable, world_tags};
+use crate::common::{
+    command_utils::display_results, display_options::DisplayOptions, table::TableDisplayable,
+    world_tags,
+};
 use anyhow::Result;
 
 /// Configuration for world search options
@@ -22,7 +25,11 @@ pub async fn handle_search_action(
         &search_options.query,
         search_options.limit,
         search_options.offset,
-        if search_options.featured { Some(true) } else { None },
+        if search_options.featured {
+            Some(true)
+        } else {
+            None
+        },
     )
     .await?;
 
@@ -56,17 +63,20 @@ pub async fn handle_get_action(
     // Display world information in Unix-style format
     println!("Name: {}", world_item.name);
     println!("ID: {}", world_item.id);
-    println!("Author: {} ({})", world_item.author_name, world_item.author_id);
+    println!(
+        "Author: {} ({})",
+        world_item.author_name, world_item.author_id
+    );
     println!("Capacity: {}", world_item.capacity);
-    
+
     if !world_item.description.is_empty() && world_item.description != "N/A" {
         println!("Description: {}", world_item.description);
     }
-    
+
     if !world_item.tags.is_empty() {
         println!("Tags: {}", world_tags::format_world_tags(&world_item.tags));
     }
-    
+
     println!("Visits: {}", world_item.visits);
     println!("Favorites: {}", world_item.favorites);
     println!("Created: {}", world_item.created_at);

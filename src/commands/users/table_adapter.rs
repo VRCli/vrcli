@@ -116,7 +116,7 @@ impl From<vrchatapi::models::LimitedUserSearch> for UserTableItem {
         UserTableItem {
             id: user.id,
             display_name: user.display_name,
-            username: None, // LimitedUserSearch doesn't include username
+            username: None,         // LimitedUserSearch doesn't include username
             bio: "N/A".to_string(), // Not available in LimitedUserSearch
             status: status_text,
             status_enum: user.status,
