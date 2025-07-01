@@ -17,6 +17,11 @@ A command-line interface for the VRChat API that lets you manage friends, users,
 
 ## Installation
 
+### From Cargo
+```bash
+cargo install vrcli
+```
+
 ### From Source
 ```bash
 git clone https://github.com/VRCli/vrcli
