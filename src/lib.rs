@@ -1,12 +1,57 @@
-// Library exports for testing
+//! # vrcli
+//!
+//! A command-line interface for the VRChat API that lets you manage friends, users, worlds, and authentication directly from your terminal.
+//!
+//! ## Features
+//!
+//! - **Friend Management**: List, search, add, and remove friends with extensive filtering and display options
+//! - **User Operations**: Search users, manage notes, view feedback, and diagnose access issues
+//! - **World Discovery**: Search and explore VRChat worlds with detailed information
+//! - **Secure Authentication**: OAuth2-based login with 2FA support and session management
+//! - **Flexible Output**: Both human-readable tables and JSON output for automation
+//! - **Cross-Platform**: Works on Windows, macOS, and Linux
+//!
+//! ## Usage
+//!
+//! This crate provides both a CLI application and a library for interacting with the VRChat API.
+//!
+//! ### As a CLI tool
+//!
+//! ```bash
+//! # Authenticate with your VRChat account
+//! vrcli auth login
+//!
+//! # List your friends
+//! vrcli friends list
+//!
+//! # Search for users
+//! vrcli users search "username"
+//!
+//! # Explore worlds
+//! vrcli worlds search "world name"
+//! ```
+//!
+//! ### As a library
+//!
+//! ```rust
+//! use vrcli::{Config, AuthMethod};
+//!
+//! // Create a configuration with cookie authentication
+//! let config = Config::new_cookie(
+//!     "your_auth_cookie".to_string(),
+//!     None // Optional 2FA cookie
+//! );
+//! ```
+
+// Library exports for external use
 pub mod commands;
 pub mod common;
 pub mod config;
 
-// Re-export commonly used types for testing
+// Re-export commonly used types for library users
 pub use config::{AuthMethod, Config};
 
-// Command enums for testing (re-exported from main.rs)
+// Command enums for CLI and library use
 use clap::Subcommand;
 
 #[derive(Subcommand)]

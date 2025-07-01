@@ -2,6 +2,29 @@
 name = "vrcli"
 version = "0.1.0"
 edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A command-line interface for the VRChat API that lets you manage friends, users, worlds, and authentication directly from your terminal"
+readme = "README.md"
+homepage = "https://github.com/VRCli/vrcli"
+repository = "https://github.com/VRCli/vrcli"
+license = "MIT"
+keywords = ["vrchat", "api", "cli", "command-line", "social"]
+categories = ["command-line-utilities", "api-bindings"]
+exclude = [
+    "reference/",
+    "scripts/",
+    "target/",
+    ".github/",
+    "tests/fixtures/",
+]
+
+[[bin]]
+name = "vrcli"
+path = "src/main.rs"
+
+[lib]
+name = "vrcli"
+path = "src/lib.rs"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
@@ -28,3 +51,9 @@ tempfile = "3.0"
 assert_cmd = "2.0"
 predicates = "3.0"
 wiremock = "0.5"
+
+[package.metadata.husky]
+hooks = ["pre-commit"]
+
+[package.metadata.husky.pre-commit]
+script = "cargo clippy --all-targets --all-features -- -D warnings"

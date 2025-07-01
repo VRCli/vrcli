@@ -2,6 +2,7 @@
 use serde_json::json;
 
 /// Create a mock user response for testing
+#[allow(dead_code)]
 pub fn mock_user_response() -> serde_json::Value {
     json!({
         "id": "usr_12345678-1234-1234-1234-123456789012",
@@ -32,6 +33,7 @@ pub fn mock_user_response() -> serde_json::Value {
 }
 
 /// Create a mock friend response for testing
+#[allow(dead_code)]
 pub fn mock_friend_response() -> serde_json::Value {
     json!({
         "id": "usr_12345678-1234-1234-1234-123456789012",
@@ -59,6 +61,7 @@ pub fn mock_friend_response() -> serde_json::Value {
 }
 
 /// Create a mock world response for testing
+#[allow(dead_code)]
 pub fn mock_world_response() -> serde_json::Value {
     json!({
         "id": "wrld_12345678-1234-1234-1234-123456789012",
@@ -96,6 +99,7 @@ pub fn mock_world_response() -> serde_json::Value {
 }
 
 /// Create a mock authentication error response
+#[allow(dead_code)]
 pub fn mock_auth_error_response() -> serde_json::Value {
     json!({
         "error": {
@@ -106,6 +110,7 @@ pub fn mock_auth_error_response() -> serde_json::Value {
 }
 
 /// Create a mock rate limit error response
+#[allow(dead_code)]
 pub fn mock_rate_limit_error() -> serde_json::Value {
     json!({
         "error": {
