@@ -2,7 +2,7 @@
 name = "vrcli"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["vrcli contributors"]
 description = "A command-line interface for the VRChat API that lets you manage friends, users, worlds, and authentication directly from your terminal"
 readme = "README.md"
 homepage = "https://github.com/VRCli/vrcli"
@@ -41,7 +41,6 @@ open = "5.0"
 futures = "0.3"
 unicode-width = "0.1"
 colored = "2.0"
-cargo-husky = "1"
 
 [dev-dependencies]
 cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-clippy"] }
