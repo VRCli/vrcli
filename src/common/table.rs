@@ -1,6 +1,30 @@
 use serde_json::{Map, Value};
 use unicode_width::UnicodeWidthStr;
 
+/// Column names for table display
+#[derive(Debug, Clone)]
+pub struct TableColumnNames {
+    pub name: &'static str,
+    pub id: &'static str,
+    pub status: &'static str,
+    pub platform: &'static str,
+    pub location: &'static str,
+    pub activity: &'static str,
+}
+
+impl Default for TableColumnNames {
+    fn default() -> Self {
+        Self {
+            name: "Name",
+            id: "ID",
+            status: "Status",
+            platform: "Platform",
+            location: "Location",
+            activity: "Activity",
+        }
+    }
+}
+
 /// Generic trait for items that can be displayed in a table format
 pub trait TableDisplayable {
     /// Get the display name/title for the item
@@ -31,6 +55,11 @@ pub trait TableDisplayable {
         None
     }
 
+    /// Get custom column names for display (override for context-specific names)
+    fn column_names(&self) -> TableColumnNames {
+        TableColumnNames::default()
+    }
+
     /// Get colored status for display (default implementation calls status())
     fn colored_status(&self) -> Option<String> {
         self.status()
@@ -39,6 +68,16 @@ pub trait TableDisplayable {
     /// Get formatted platform for display
     fn formatted_platform(&self) -> Option<String> {
         self.platform().map(|p| p.to_string())
+    }
+
+    /// Get formatted location for display
+    fn formatted_location(&self) -> Option<String> {
+        self.location().map(|l| l.to_string())
+    }
+
+    /// Get formatted activity for display
+    fn formatted_activity(&self) -> Option<String> {
+        self.activity().map(|a| a.to_string())
     }
 
     /// Convert to JSON representation
@@ -136,9 +175,21 @@ impl ColumnWidths {
             }
 
             // Calculate location width
-            if let Some(location) = item.location() {
+            if let Some(formatted_location) = item.formatted_location() {
+                let location_width = formatted_location.width();
+                widths.location = widths.location.max(location_width);
+            } else if let Some(location) = item.location() {
                 let location_width = location.width();
                 widths.location = widths.location.max(location_width);
+            }
+
+            // Calculate activity width (for formatted activity)
+            if let Some(formatted_activity) = item.formatted_activity() {
+                let activity_width = formatted_activity.width();
+                // Activity doesn't have a fixed width limit since it's the last column
+            } else if let Some(activity) = item.activity() {
+                let activity_width = activity.width();
+                // Activity doesn't have a fixed width limit since it's the last column
             }
         }
 
@@ -165,24 +216,31 @@ pub fn format_table<T: TableDisplayable>(
     let widths = ColumnWidths::calculate_from_data(items);
     let mut output = String::new();
 
+    // Get column names from the first item (assuming all items have the same column names)
+    let column_names = if let Some(first_item) = items.first() {
+        first_item.column_names()
+    } else {
+        TableColumnNames::default()
+    };
+
     // Build header
     let mut header = String::new();
-    header.push_str(&format!("{:<width$}", "Name", width = widths.name));
+    header.push_str(&format!("{:<width$}", column_names.name, width = widths.name));
 
     if options.show_id {
-        header.push_str(&format!("{:<width$}", "ID", width = widths.id));
+        header.push_str(&format!("{:<width$}", column_names.id, width = widths.id));
     }
     if options.show_status {
-        header.push_str(&format!("{:<width$}", "Status", width = widths.status));
+        header.push_str(&format!("{:<width$}", column_names.status, width = widths.status));
     }
     if options.show_platform {
-        header.push_str(&format!("{:<width$}", "Platform", width = widths.platform));
+        header.push_str(&format!("{:<width$}", column_names.platform, width = widths.platform));
     }
     if options.show_location {
-        header.push_str(&format!("{:<width$}", "Location", width = widths.location));
+        header.push_str(&format!("{:<width$}", column_names.location, width = widths.location));
     }
     if options.show_activity {
-        header.push_str("Activity");
+        header.push_str(column_names.activity);
     }
 
     output.push_str(&header);
@@ -235,7 +293,13 @@ pub fn format_table<T: TableDisplayable>(
 
         // Location column
         if options.show_location {
-            if let Some(location) = item.location() {
+            if let Some(formatted_location) = item.formatted_location() {
+                let location_formatted = crate::common::utils::format_text_with_width(
+                    &formatted_location,
+                    widths.location,
+                );
+                row.push_str(&location_formatted);
+            } else if let Some(location) = item.location() {
                 let formatted_location =
                     crate::common::utils::format_text_with_width(location, widths.location);
                 row.push_str(&formatted_location);
@@ -246,7 +310,9 @@ pub fn format_table<T: TableDisplayable>(
 
         // Activity column (no fixed width for last column)
         if options.show_activity {
-            if let Some(activity) = item.activity() {
+            if let Some(formatted_activity) = item.formatted_activity() {
+                row.push_str(&formatted_activity);
+            } else if let Some(activity) = item.activity() {
                 row.push_str(activity);
             }
         }

@@ -25,6 +25,11 @@ enum Commands {
         #[command(subcommand)]
         action: UsersAction,
     },
+    /// World operations
+    Worlds {
+        #[command(subcommand)]
+        action: WorldsAction,
+    },
     /// Configure authentication
     Auth {
         #[command(subcommand)]
@@ -123,6 +128,39 @@ enum AuthAction {
     Login,
     /// Show current authentication status
     Status,
+}
+
+#[derive(Subcommand)]
+enum WorldsAction {
+    /// Search worlds by name
+    Search {
+        /// Search query (world name)
+        query: String,
+        /// Number of results to return
+        #[arg(short = 'n', long, default_value = "20")]
+        limit: i32,
+        /// Offset for pagination
+        #[arg(short, long, default_value = "0")]
+        offset: i32,
+        /// Filter featured worlds only
+        #[arg(long)]
+        featured: bool,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+        /// Show detailed information
+        #[arg(short = 'l', long)]
+        long: bool,
+    },
+
+    /// Get world details by ID
+    Get {
+        /// World ID (e.g., wrld_12345678-1234-1234-1234-123456789012)
+        world_id: String,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -229,6 +267,7 @@ async fn main() -> Result<()> {
     match cli.command {
         Commands::Friends { action } => commands::friends::handle_friends_command(action).await,
         Commands::Users { action } => commands::users::handle_users_command(action).await,
+        Commands::Worlds { action } => commands::worlds::handle_worlds_command(action).await,
         Commands::Auth { action } => commands::auth::handle_auth_command(action).await,
     }
 }
