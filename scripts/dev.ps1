@@ -18,12 +18,12 @@ function Check-Format {
 
 function Run-Clippy {
     Write-Host "Running clippy..." -ForegroundColor Yellow
-    cargo clippy --all-targets --all-features -- -D warnings
+    cargo clippy --all-targets --all-features -- -D warnings -D clippy::unnecessary-unwrap
 }
 
 function Fix-Clippy {
     Write-Host "Running clippy with auto-fix..." -ForegroundColor Yellow
-    cargo clippy --fix --allow-dirty --all-targets --all-features -- -D warnings
+    cargo clippy --fix --allow-dirty --all-targets --all-features -- -D warnings -D clippy::unnecessary-unwrap
 }
 
 function Fix-All {
@@ -49,15 +49,15 @@ function Run-All-Checks {
 function Run-CI-Local {
     Write-Host "Running CI workflow locally (same as GitHub Actions)..." -ForegroundColor Cyan
     
-    Write-Host "Step 1: Format code" -ForegroundColor Yellow
-    cargo fmt --all
+    Write-Host "Step 1: Format check (strict)" -ForegroundColor Yellow
+    cargo fmt --all -- --check
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Format check failed!" -ForegroundColor Red
+        Write-Host "Format check failed! Run 'cargo fmt --all' to fix." -ForegroundColor Red
         exit $LASTEXITCODE
     }
     
-    Write-Host "Step 2: Run clippy" -ForegroundColor Yellow
-    cargo clippy --all-targets --all-features -- -D warnings
+    Write-Host "Step 2: Run clippy (strict)" -ForegroundColor Yellow
+    cargo clippy --all-targets --all-features -- -D warnings -D clippy::unnecessary-unwrap
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Clippy checks failed!" -ForegroundColor Red
         exit $LASTEXITCODE
