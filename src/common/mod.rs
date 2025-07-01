@@ -1,3 +1,4 @@
+pub mod auth_client;
 pub mod command_utils;
 pub mod display_options;
 pub mod formatter;

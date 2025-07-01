@@ -1,4 +1,3 @@
-mod auth_client;
 mod commands;
 mod common;
 mod config;

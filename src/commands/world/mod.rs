@@ -1,7 +1,7 @@
 mod table_adapter;
 
 use crate::common::{formatter::GenericFormatter, output_options::OutputOptions};
-use crate::auth_client::AuthenticatedClient;
+use crate::common::auth_client::AuthenticatedClient;
 use anyhow::Result;
 use table_adapter::WorldTableItem;
 

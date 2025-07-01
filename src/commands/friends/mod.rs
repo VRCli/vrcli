@@ -4,7 +4,7 @@ mod sorting;
 mod table_adapter;
 mod utils;
 
-use crate::auth_client::AuthenticatedClient;
+use crate::common::auth_client::AuthenticatedClient;
 use crate::common::display_options::DisplayOptions;
 use crate::FriendsAction;
 use anyhow::Result;

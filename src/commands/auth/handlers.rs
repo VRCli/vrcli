@@ -1,5 +1,5 @@
 use super::login;
-use crate::auth_client::AuthenticatedClient;
+use crate::common::auth_client::AuthenticatedClient;
 use crate::config::Config;
 use crate::AuthAction;
 use anyhow::Result;

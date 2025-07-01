@@ -17,7 +17,7 @@ pub struct UserSearchOptions {
 fn display_single_user(
     user: &UserTableItem,
     options: &DisplayOptions,
-    auth_client: &crate::auth_client::AuthenticatedClient,
+    auth_client: &crate::common::auth_client::AuthenticatedClient,
 ) -> Result<()> {
     if options.json {
         let json_obj = user.to_json_object(&options.to_output_options());
@@ -96,7 +96,7 @@ pub async fn handle_search_action(
 
 /// Handle the Get action
 pub async fn handle_get_action(
-    auth_client: &crate::auth_client::AuthenticatedClient,
+    auth_client: &crate::common::auth_client::AuthenticatedClient,
     identifier: &str,
     use_id: bool,
     display_options: DisplayOptions,
@@ -133,7 +133,7 @@ pub async fn handle_get_action(
 
 /// Handle the GetByName action
 pub async fn handle_get_by_name_action(
-    auth_client: &crate::auth_client::AuthenticatedClient,
+    auth_client: &crate::common::auth_client::AuthenticatedClient,
     username: &str,
     display_options: DisplayOptions,
 ) -> Result<()> {
