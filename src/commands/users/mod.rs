@@ -1,5 +1,5 @@
 mod fetcher;
-mod handlers;
+pub mod handlers;
 mod sorting;
 mod table_adapter;
 mod utils;

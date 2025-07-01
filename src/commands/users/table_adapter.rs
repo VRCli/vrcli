@@ -7,6 +7,7 @@ pub struct UserTableItem {
     pub id: String,
     pub display_name: String,
     pub username: Option<String>,
+    pub bio: String,
     pub status: String,
     pub status_enum: vrchatapi::models::UserStatus, // Store original enum for color formatting
     pub last_activity: String,
@@ -62,6 +63,11 @@ impl TableDisplayable for UserTableItem {
             obj.insert("username".to_string(), Value::String(username.clone()));
         }
 
+        // Always include bio if it's not empty or "N/A"
+        if !self.bio.is_empty() && self.bio != "N/A" {
+            obj.insert("bio".to_string(), Value::String(self.bio.clone()));
+        }
+
         if options.show_status {
             obj.insert("status".to_string(), Value::String(self.status.clone()));
         }
@@ -93,6 +99,7 @@ impl From<vrchatapi::models::User> for UserTableItem {
             id: user.id,
             display_name: user.display_name,
             username: user.username,
+            bio: user.bio,
             status: status_text,
             status_enum: user.status,
             last_activity: user.last_activity,
@@ -110,6 +117,7 @@ impl From<vrchatapi::models::LimitedUserSearch> for UserTableItem {
             id: user.id,
             display_name: user.display_name,
             username: None, // LimitedUserSearch doesn't include username
+            bio: "N/A".to_string(), // Not available in LimitedUserSearch
             status: status_text,
             status_enum: user.status,
             last_activity: "N/A".to_string(), // Not available in LimitedUserSearch

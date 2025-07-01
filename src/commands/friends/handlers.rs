@@ -63,15 +63,28 @@ pub async fn handle_list_action(
 
 /// Handle the Get action
 pub async fn handle_get_action(
-    api_config: &vrchatapi::apis::configuration::Configuration,
+    _api_config: &vrchatapi::apis::configuration::Configuration,
     identifier: &str,
     use_direct_id: bool,
+    json: bool,
 ) -> Result<()> {
-    crate::common::user_operations::get_user_simple(
-        api_config,
-        identifier,
-        use_direct_id,
-    ).await
+    // Use the same detailed display format as users get command
+    use crate::commands::users::handlers;
+    use crate::common::auth_client::AuthenticatedClient;
+    use crate::common::display_options::DisplayOptions;
+    
+    let auth_client = AuthenticatedClient::new().await?;
+    let display_options = DisplayOptions::from_flags(
+        false, // long_format 
+        false, // show_id
+        false, // show_status
+        false, // show_platform
+        false, // show_location
+        false, // show_activity
+        json,  // json
+    );
+    
+    handlers::handle_get_action(&auth_client, identifier, use_direct_id, display_options).await
 }
 
 /// Handle the Add action

@@ -36,6 +36,12 @@ fn display_single_user(
         println!("Username: {username}");
     }
 
+    // Display bio if it's not empty or "N/A"
+    if !user.bio.is_empty() && user.bio != "N/A" {
+        let escaped_bio = user.bio.replace('\n', "\\n").replace('\r', "\\r");
+        println!("Bio: {}", escaped_bio);
+    }
+
     if options.show_status {
         // Use colored status for better visibility
         let colored_status = crate::common::utils::format_user_status(&user.status_enum, true);

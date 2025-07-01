@@ -95,6 +95,9 @@ enum FriendsAction {
         /// Use direct user ID instead of resolving display name
         #[arg(long)]
         id: bool,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
     },
     /// Send a friend request to a user
     Add {

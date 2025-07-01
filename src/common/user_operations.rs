@@ -49,6 +49,7 @@ pub async fn fetch_user_by_resolved_id(
 }
 
 /// Display user in simple text format (for friends get)
+#[allow(dead_code)]
 pub fn display_user_simple(user: &vrchatapi::models::User) {
     println!("User: {} ({})", user.display_name, user.id);
     println!("Status: {}", user.status_description);
@@ -101,6 +102,7 @@ pub async fn verify_user_access(
 }
 
 /// Combined user get operation with simple display
+#[allow(dead_code)]
 pub async fn get_user_simple(
     api_config: &vrchatapi::apis::configuration::Configuration,
     identifier: &str,
