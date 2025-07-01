@@ -185,10 +185,10 @@ impl ColumnWidths {
 
             // Calculate activity width (for formatted activity)
             if let Some(formatted_activity) = item.formatted_activity() {
-                let activity_width = formatted_activity.width();
+                let _activity_width = formatted_activity.width();
                 // Activity doesn't have a fixed width limit since it's the last column
             } else if let Some(activity) = item.activity() {
-                let activity_width = activity.width();
+                let _activity_width = activity.width();
                 // Activity doesn't have a fixed width limit since it's the last column
             }
         }

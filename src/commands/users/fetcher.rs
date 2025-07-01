@@ -2,6 +2,7 @@ use anyhow::Result;
 use vrchatapi::apis::users_api;
 
 /// Fetch user data from VRChat API
+#[allow(dead_code)]
 pub async fn fetch_user_by_id(
     api_config: &vrchatapi::apis::configuration::Configuration,
     user_id: &str,
