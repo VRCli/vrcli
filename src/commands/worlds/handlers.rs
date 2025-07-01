@@ -1,5 +1,5 @@
 use super::{fetcher, table_adapter::WorldTableItem};
-use crate::common::{command_utils::display_results, display_options::DisplayOptions, table::TableDisplayable};
+use crate::common::{command_utils::display_results, display_options::DisplayOptions, table::TableDisplayable, world_tags};
 use anyhow::Result;
 
 /// Configuration for world search options
@@ -64,7 +64,7 @@ pub async fn handle_get_action(
     }
     
     if !world_item.tags.is_empty() {
-        println!("Tags: {}", world_item.tags.join(", "));
+        println!("Tags: {}", world_tags::format_world_tags(&world_item.tags));
     }
     
     println!("Visits: {}", world_item.visits);

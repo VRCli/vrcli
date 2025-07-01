@@ -5,3 +5,4 @@ pub mod formatter;
 pub mod output_options;
 pub mod table;
 pub mod utils;
+pub mod world_tags;
