@@ -106,7 +106,34 @@ pub fn format_text_with_width(text: &str, width: usize) -> String {
 
 /// Validate user ID format
 pub fn is_valid_user_id(user_id: &str) -> bool {
-    user_id.starts_with("usr_") || user_id.len() == 8 // Legacy format
+    // Modern format: starts with "usr_" followed by UUID-like string
+    if user_id.starts_with("usr_") {
+        let suffix = &user_id[4..];
+        // Check if suffix looks like a UUID (8-4-4-4-12 format with hyphens)
+        return suffix.len() >= 32; // At minimum, should have 32+ characters
+    }
+    
+    // Legacy format: exactly 8 characters, alphanumeric
+    // But be more strict - legacy IDs are typically random-looking combinations
+    // Exclude common words that might be display names
+    if user_id.len() == 8 {
+        let is_alphanumeric = user_id.chars().all(|c| c.is_ascii_alphanumeric());
+        if !is_alphanumeric {
+            return false;
+        }
+        
+        // Additional check: legacy user IDs typically contain both letters and numbers
+        // and are case-sensitive with mixed case
+        let has_digit = user_id.chars().any(|c| c.is_ascii_digit());
+        let has_upper = user_id.chars().any(|c| c.is_ascii_uppercase());
+        let has_lower = user_id.chars().any(|c| c.is_ascii_lowercase());
+        
+        // Legacy IDs usually have a mix of cases and contain numbers
+        // "Nekomasu" would fail this test (no digits, no lowercase)
+        return has_digit && (has_upper || has_lower);
+    }
+    
+    false
 }
 
 /// Resolve display name to user ID using search API
@@ -116,14 +143,22 @@ pub async fn resolve_display_name_to_user_id(
     display_name: &str,
 ) -> Result<String> {
     // Search for users by display name
-    let search_results = apis::users_api::search_users(
+    let search_results = match apis::users_api::search_users(
         api_config,
         Some(display_name),
         None,     // developer_type
         Some(10), // limit to 10 results
         None,     // offset
     )
-    .await?;
+    .await {
+        Ok(results) => results,
+        Err(e) => {
+            return Err(anyhow::anyhow!(
+                "Failed to search for user '{}': {}",
+                display_name, e
+            ));
+        }
+    };
 
     if search_results.is_empty() {
         return Err(anyhow::anyhow!(

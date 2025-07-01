@@ -67,29 +67,11 @@ pub async fn handle_get_action(
     identifier: &str,
     use_direct_id: bool,
 ) -> Result<()> {
-    let user_id = if use_direct_id {
-        // Use the identifier as-is (should be a user ID)
-        if !crate::common::utils::is_valid_user_id(identifier) {
-            return Err(anyhow::anyhow!("Invalid user ID format when using --id flag. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
-        }
-        identifier.to_string()
-    } else {
-        // Try to resolve identifier (could be display name or user ID)
-        crate::common::utils::resolve_user_identifier(api_config, identifier).await?
-    };
-
-    let user = apis::users_api::get_user(api_config, &user_id).await?;
-    println!("User: {} ({})", user.display_name, user.id);
-    println!("Status: {}", user.status_description);
-    if !user.bio.is_empty() {
-        println!("Bio: {}", user.bio);
-    }
-    println!("Platform: {}", user.last_platform);
-    if !user.tags.is_empty() {
-        println!("Tags: {}", user.tags.join(", "));
-    }
-
-    Ok(())
+    crate::common::user_operations::get_user_simple(
+        api_config,
+        identifier,
+        use_direct_id,
+    ).await
 }
 
 /// Handle the Add action
@@ -98,16 +80,9 @@ pub async fn handle_add_action(
     identifier: &str,
     use_direct_id: bool,
 ) -> Result<()> {
-    let user_id = if use_direct_id {
-        // Use the identifier as-is (should be a user ID)
-        if !crate::common::utils::is_valid_user_id(identifier) {
-            return Err(anyhow::anyhow!("Invalid user ID format when using --id flag. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
-        }
-        identifier.to_string()
-    } else {
-        // Try to resolve identifier (could be display name or user ID)
-        crate::common::utils::resolve_user_identifier(api_config, identifier).await?
-    };
+    let user_id = crate::common::user_operations::resolve_user_identifier(
+        api_config, identifier, use_direct_id
+    ).await?;
 
     match apis::friends_api::friend(api_config, &user_id).await {
         Ok(notification) => {
@@ -128,16 +103,9 @@ pub async fn handle_remove_action(
     identifier: &str,
     use_direct_id: bool,
 ) -> Result<()> {
-    let user_id = if use_direct_id {
-        // Use the identifier as-is (should be a user ID)
-        if !crate::common::utils::is_valid_user_id(identifier) {
-            return Err(anyhow::anyhow!("Invalid user ID format when using --id flag. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
-        }
-        identifier.to_string()
-    } else {
-        // Try to resolve identifier (could be display name or user ID)
-        crate::common::utils::resolve_user_identifier(api_config, identifier).await?
-    };
+    let user_id = crate::common::user_operations::resolve_user_identifier(
+        api_config, identifier, use_direct_id
+    ).await?;
 
     // First check if they are a friend or if there's an outgoing request
     match apis::friends_api::get_friend_status(api_config, &user_id).await {
@@ -161,7 +129,7 @@ pub async fn handle_remove_action(
             }
         }
         Err(e) => {
-            return Err(anyhow::anyhow!("Failed to check friend status: {}", e));
+            return Err(anyhow::anyhow!("Failed to get friend status: {}", e));
         }
     }
 
@@ -174,16 +142,9 @@ pub async fn handle_status_action(
     identifier: &str,
     use_direct_id: bool,
 ) -> Result<()> {
-    let user_id = if use_direct_id {
-        // Use the identifier as-is (should be a user ID)
-        if !crate::common::utils::is_valid_user_id(identifier) {
-            return Err(anyhow::anyhow!("Invalid user ID format when using --id flag. User IDs should start with 'usr_' or be 8 characters long (legacy format)."));
-        }
-        identifier.to_string()
-    } else {
-        // Try to resolve identifier (could be display name or user ID)
-        crate::common::utils::resolve_user_identifier(api_config, identifier).await?
-    };
+    let user_id = crate::common::user_operations::resolve_user_identifier(
+        api_config, identifier, use_direct_id
+    ).await?;
 
     match apis::friends_api::get_friend_status(api_config, &user_id).await {
         Ok(status) => {

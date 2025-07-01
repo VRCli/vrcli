@@ -93,5 +93,11 @@ pub async fn handle_users_command(action: UsersAction) -> Result<()> {
                 DisplayOptions::from_flags(false, false, false, false, false, false, json);
             handlers::handle_feedback_action(api_config, &identifier, id, display_options).await
         }
+        UsersAction::Diagnose { identifier, id } => {
+            // Use the diagnosis function directly without requiring authentication client
+            crate::common::user_operations::diagnose_user_access_issues(
+                api_config, &identifier, id
+            ).await
+        }
     }
 }

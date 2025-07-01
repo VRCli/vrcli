@@ -102,26 +102,17 @@ pub async fn handle_get_action(
     display_options: DisplayOptions,
 ) -> Result<()> {
     let api_config = auth_client.api_config();
-    let (resolved_id, is_user_id) = utils::resolve_user_identifier(identifier, use_id);
+    
+    // Use common user resolution and fetching
+    let user_id = crate::common::user_operations::resolve_user_identifier(
+        api_config, identifier, use_id
+    ).await?;
+    let user = crate::common::user_operations::fetch_user_by_resolved_id(
+        api_config, &user_id
+    ).await?;
 
-    let user = if is_user_id {
-        fetcher::fetch_user_by_id(api_config, &resolved_id).await?
-    } else {
-        // If not a user ID, we need to search first to get the user ID
-        let search_results = fetcher::search_users(api_config, &resolved_id, 10, 0, None).await?;
-
-        // Find exact match by display name
-        let matching_user = search_results
-            .into_iter()
-            .find(|u| u.display_name.eq_ignore_ascii_case(&resolved_id))
-            .ok_or_else(|| anyhow::anyhow!("User not found: {}", resolved_id))?;
-
-        fetcher::fetch_user_by_id(api_config, &matching_user.id).await?
-    };
-
+    // Convert to table item and display with enhanced options
     let user_item = UserTableItem::from(user);
-
-    // Create enhanced display options for get command
     let mut detailed_options = display_options.clone();
     detailed_options.show_id = true;
     detailed_options.show_status = true;

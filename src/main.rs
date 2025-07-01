@@ -232,6 +232,15 @@ enum UsersAction {
         #[arg(long)]
         json: bool,
     },
+
+    /// Diagnose user access issues (troubleshoot 404 errors)
+    Diagnose {
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+    },
 }
 
 #[derive(Subcommand)]

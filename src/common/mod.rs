@@ -4,5 +4,6 @@ pub mod display_options;
 pub mod formatter;
 pub mod output_options;
 pub mod table;
+pub mod user_operations;
 pub mod utils;
 pub mod world_tags;
