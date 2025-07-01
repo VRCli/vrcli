@@ -17,7 +17,6 @@ A command-line interface for the VRChat API that lets you manage friends, users,
 - **Friend Management**: List, search, add, and remove friends with extensive filtering and display options
 - **User Operations**: Search users, manage notes, view feedback, and diagnose access issues
 - **World Discovery**: Search and explore VRChat worlds with detailed information
-- **Secure Authentication**: OAuth2-based login with 2FA support and session management
 - **Flexible Output**: Both human-readable tables and JSON output for automation
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 
