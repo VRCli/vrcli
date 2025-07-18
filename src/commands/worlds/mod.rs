@@ -4,7 +4,7 @@ mod table_adapter;
 
 use crate::common::auth_client::AuthenticatedClient;
 use crate::common::display_options::DisplayOptions;
-use crate::WorldsAction;
+use vrcli::WorldsAction;
 use anyhow::Result;
 use handlers::WorldSearchOptions;
 

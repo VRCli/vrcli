@@ -416,7 +416,6 @@ pub async fn handle_request_invite_action(
 
     let request = vrchatapi::models::RequestInviteRequest {
         message_slot: Some(slot),
-        ..Default::default()
     };
 
     match apis::invite_api::request_invite(api_config, &user_id, Some(request)).await {

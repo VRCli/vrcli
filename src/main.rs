@@ -4,7 +4,7 @@ mod config;
 
 use anyhow::Result;
 use clap::Parser;
-use vrcli::{AuthAction, Commands, FriendsAction, NoteAction, UsersAction, WorldsAction};
+use vrcli::{Commands};
 
 #[derive(Parser)]
 #[command(name = "vrcli")]

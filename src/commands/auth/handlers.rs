@@ -1,7 +1,7 @@
 use super::login;
 use crate::common::auth_client::AuthenticatedClient;
 use crate::config::Config;
-use crate::AuthAction;
+use vrcli::AuthAction;
 use anyhow::Result;
 
 /// Handle authentication commands

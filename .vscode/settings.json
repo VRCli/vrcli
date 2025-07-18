@@ -8,7 +8,7 @@
         "warnings"
     ],
     "rust-analyzer.checkOnSave": true,
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "rust-analyzer.rustfmt.overrideCommand": [
         "cargo",
         "fmt",

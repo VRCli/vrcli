@@ -4,7 +4,7 @@ mod two_factor;
 mod utils;
 mod verification;
 
-use crate::AuthAction;
+use vrcli::AuthAction;
 use anyhow::Result;
 
 /// Main entry point for authentication commands
