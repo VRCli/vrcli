@@ -39,7 +39,7 @@ fn test_auth_help() {
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Configure authentication"));
+        .stdout(predicate::str::contains("Authentication management"));
 }
 
 #[test]
@@ -49,7 +49,7 @@ fn test_users_help() {
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("User operations"));
+        .stdout(predicate::str::contains("Manage users"));
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn test_worlds_help() {
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("World operations"));
+        .stdout(predicate::str::contains("Manage worlds"));
 }
 
 // Note: Tests that require actual API authentication should be run separately
