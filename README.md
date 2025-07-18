@@ -246,12 +246,34 @@ Make sure you have the `rust-analyzer` extension installed.
 
 ### Pre-commit Hooks
 
-The project uses `cargo-husky` to run the same Clippy checks locally before each commit. This prevents CI failures due to linting issues.
+The project uses `cargo-husky` to automatically check code quality before each commit:
 
-If you want to bypass the pre-commit hook temporarily:
+**Automatic checks performed on commit:**
+- **Code formatting**: Ensures all code is properly formatted with `cargo fmt`
+- **Linting**: Runs Clippy with the same rules as CI to catch issues early
+
+**How it works:**
+- If code is not formatted, the hook will automatically format it and ask you to stage the changes
+- If Clippy finds any warnings or errors, the commit will be blocked until fixed
+
+**Manual testing:**
+```bash
+# Test pre-commit checks without committing (Windows)
+.\scripts\pre-commit.ps1
+
+# Test pre-commit checks with auto-fix (Windows)
+.\scripts\pre-commit.ps1 -Fix
+
+# Test using Make (Linux/macOS)
+make pre-commit
+```
+
+**Bypassing hooks temporarily** (not recommended):
 ```bash
 git commit --no-verify -m "your message"
 ```
+
+The pre-commit hooks ensure that all code committed to the repository meets our quality standards and prevents CI failures due to formatting or linting issues.
 
 ### CI Consistency
 

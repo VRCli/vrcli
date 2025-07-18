@@ -4,7 +4,7 @@ mod config;
 
 use anyhow::Result;
 use clap::Parser;
-use vrcli::{Commands};
+use vrcli::Commands;
 
 #[derive(Parser)]
 #[command(name = "vrcli")]

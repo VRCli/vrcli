@@ -58,8 +58,16 @@ clean:
 install:
 	cargo install --path .
 
-# Pre-commit hook (format + check)
-pre-commit: format clippy
+# Pre-commit hook (format check + clippy)
+pre-commit:
+	@echo "Running pre-commit checks..."
+	@if ! cargo fmt --check; then \
+		echo "Code is not formatted. Running cargo fmt..."; \
+		cargo fmt --all; \
+		echo "Code has been formatted. Please stage the changes and commit again."; \
+		exit 1; \
+	fi
+	cargo clippy --all-targets --all-features -- -D warnings
 	@echo "Pre-commit checks completed successfully!"
 
 # Setup git hooks

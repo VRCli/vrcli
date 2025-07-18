@@ -6,9 +6,9 @@ mod utils;
 
 use crate::common::auth_client::AuthenticatedClient;
 use crate::common::display_options::DisplayOptions;
-use vrcli::UsersAction;
 use anyhow::Result;
 use handlers::UserSearchOptions;
+use vrcli::UsersAction;
 
 pub async fn handle_users_command(action: UsersAction) -> Result<()> {
     let auth_client = AuthenticatedClient::new().await?;
@@ -90,15 +90,14 @@ pub async fn handle_users_command(action: UsersAction) -> Result<()> {
                         show_location: false,
                         show_activity: false,
                     };
-                    handlers::handle_note_get_action(api_config, &identifier, id, display_options).await
+                    handlers::handle_note_get_action(api_config, &identifier, id, display_options)
+                        .await
                 }
                 NoteAction::Set {
                     identifier,
                     note,
                     id,
-                } => {
-                    handlers::handle_note_set_action(api_config, &identifier, &note, id).await
-                }
+                } => handlers::handle_note_set_action(api_config, &identifier, &note, id).await,
             }
         }
         UsersAction::Notes { json, long } => {
@@ -113,7 +112,11 @@ pub async fn handle_users_command(action: UsersAction) -> Result<()> {
             };
             handlers::handle_notes_list_action(api_config, display_options).await
         }
-        UsersAction::Feedback { identifier, id, json } => {
+        UsersAction::Feedback {
+            identifier,
+            id,
+            json,
+        } => {
             let display_options = DisplayOptions {
                 json,
                 long_format: false,
@@ -126,8 +129,8 @@ pub async fn handle_users_command(action: UsersAction) -> Result<()> {
             handlers::handle_feedback_action(api_config, &identifier, id, display_options).await
         }
         UsersAction::Diagnose { identifier, id } => {
-            crate::common::user_operations::diagnose_user_access_issues(api_config, &identifier, id).await
+            crate::common::user_operations::diagnose_user_access_issues(api_config, &identifier, id)
+                .await
         }
     }
 }
-

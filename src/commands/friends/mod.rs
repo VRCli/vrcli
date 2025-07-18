@@ -6,9 +6,9 @@ mod utils;
 
 use crate::common::auth_client::AuthenticatedClient;
 use crate::common::display_options::DisplayOptions;
-use vrcli::FriendsAction;
 use anyhow::Result;
 use handlers::ListFilterOptions;
+use vrcli::FriendsAction;
 
 pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
     let auth_client = AuthenticatedClient::new().await?;

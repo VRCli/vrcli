@@ -1,8 +1,8 @@
 use super::login;
 use crate::common::auth_client::AuthenticatedClient;
 use crate::config::Config;
-use vrcli::AuthAction;
 use anyhow::Result;
+use vrcli::AuthAction;
 
 /// Handle authentication commands
 pub async fn handle_auth_command(action: AuthAction) -> Result<()> {

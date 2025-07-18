@@ -4,9 +4,9 @@ mod table_adapter;
 
 use crate::common::auth_client::AuthenticatedClient;
 use crate::common::display_options::DisplayOptions;
-use vrcli::WorldsAction;
 use anyhow::Result;
 use handlers::WorldSearchOptions;
+use vrcli::WorldsAction;
 
 pub async fn handle_worlds_command(action: WorldsAction) -> Result<()> {
     let auth_client = AuthenticatedClient::new().await?;

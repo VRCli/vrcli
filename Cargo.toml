@@ -43,7 +43,7 @@ unicode-width = "0.1"
 colored = "2.0"
 
 [dev-dependencies]
-cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-clippy"] }
+cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-fmt", "run-cargo-clippy"] }
 tokio-test = "0.4"
 mockito = "1.0"
 tempfile = "3.0"
