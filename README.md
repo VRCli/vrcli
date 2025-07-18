@@ -65,7 +65,7 @@ vrcli <resource> <action> [options]
 Clone the repo and install dependencies:
 
 ```powershell
-git clone https://github.com/your/repo.git
+git clone https://github.com/VRCli/vrcli
 cd vrcli
 cargo install cargo-husky
 ```
