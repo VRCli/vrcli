@@ -65,5 +65,21 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
         FriendsAction::Status { identifier, id } => {
             handlers::handle_status_action(api_config, &identifier, id).await
         }
+        FriendsAction::RequestInvite {
+            identifier,
+            id,
+            message_slot,
+        } => {
+            handlers::handle_request_invite_action(api_config, &identifier, id, message_slot).await
+        }
+        FriendsAction::Invite {
+            identifier,
+            instance_id,
+            id,
+            message_slot,
+        } => {
+            handlers::handle_invite_action(api_config, &identifier, &instance_id, id, message_slot)
+                .await
+        }
     }
 }

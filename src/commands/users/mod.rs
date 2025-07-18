@@ -46,6 +46,7 @@ pub async fn handle_users_command(action: UsersAction) -> Result<()> {
             identifier,
             id,
             json,
+            long,
         } => {
             let display_options = DisplayOptions::from_flags(
                 false, // long_format - will be set by get handler
@@ -58,12 +59,18 @@ pub async fn handle_users_command(action: UsersAction) -> Result<()> {
             );
             handlers::handle_get_action(&auth_client, &identifier, id, display_options).await
         }
-        UsersAction::GetByName { username, json } => {
+        UsersAction::GetByName {
+            username,
+            json,
+            long,
+        } => {
             let display_options =
                 DisplayOptions::from_flags(false, false, false, false, false, false, json);
             handlers::handle_get_by_name_action(&auth_client, &username, display_options).await
         }
-        UsersAction::Note(note_action) => match note_action {
+        UsersAction::Note {
+            action: note_action,
+        } => match note_action {
             NoteAction::Get {
                 identifier,
                 id,

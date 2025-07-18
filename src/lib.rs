@@ -1,58 +1,13 @@
-//! # vrcli
-//!
-//! A command-line interface for the VRChat API that lets you manage friends, users, worlds, and authentication directly from your terminal.
-//!
-//! ## Features
-//!
-//! - **Friend Management**: List, search, add, and remove friends with extensive filtering and display options
-//! - **User Operations**: Search users, manage notes, view feedback, and diagnose access issues
-//! - **World Discovery**: Search and explore VRChat worlds with detailed information
-//! - **Secure Authentication**: OAuth2-based login with 2FA support and session management
-//! - **Flexible Output**: Both human-readable tables and JSON output for automation
-//! - **Cross-Platform**: Works on Windows, macOS, and Linux
-//!
-//! ## Usage
-//!
-//! This crate provides both a CLI application and a library for interacting with the VRChat API.
-//!
-//! ### As a CLI tool
-//!
-//! ```bash
-//! # Authenticate with your VRChat account
-//! vrcli auth login
-//!
-//! # List your friends
-//! vrcli friends list
-//!
-//! # Search for users
-//! vrcli users search "username"
-//!
-//! # Explore worlds
-//! vrcli worlds search "world name"
-//! ```
-//!
-//! ### As a library
-//!
-//! ```rust
-//! use vrcli::{Config, AuthMethod};
-//!
-//! // Create a configuration with cookie authentication
-//! let config = Config::new_cookie(
-//!     "your_auth_cookie".to_string(),
-//!     None // Optional 2FA cookie
-//! );
-//! ```
+use clap::{Parser, Subcommand};
 
-// Library exports for external use
-pub mod commands;
-pub mod common;
-pub mod config;
-
-// Re-export commonly used types for library users
-pub use config::{AuthMethod, Config};
-
-// Command enums for CLI and library use
-use clap::Subcommand;
+#[derive(Parser)]
+#[command(name = "vrcli")]
+#[command(about = "A simple CLI tool for VRChat API")]
+#[command(version)]
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -61,17 +16,17 @@ pub enum Commands {
         #[command(subcommand)]
         action: FriendsAction,
     },
-    /// User operations
+    /// Manage users
     Users {
         #[command(subcommand)]
         action: UsersAction,
     },
-    /// World operations
+    /// Manage worlds
     Worlds {
         #[command(subcommand)]
         action: WorldsAction,
     },
-    /// Configure authentication
+    /// Authentication management
     Auth {
         #[command(subcommand)]
         action: AuthAction,
@@ -169,6 +124,30 @@ pub enum FriendsAction {
         #[arg(long)]
         id: bool,
     },
+    /// Request an invite from a friend
+    RequestInvite {
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+        /// Message slot (0-7)
+        #[arg(short = 'm', long)]
+        message_slot: Option<i32>,
+    },
+    /// Send an invite to a friend to a specific instance
+    Invite {
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Instance ID to invite to
+        instance_id: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+        /// Message slot (0-7)
+        #[arg(short = 'm', long)]
+        message_slot: Option<i32>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -203,19 +182,27 @@ pub enum UsersAction {
         /// Output in JSON format
         #[arg(long)]
         json: bool,
+        /// Show detailed information
+        #[arg(short = 'l', long)]
+        long: bool,
     },
-    /// Get user by exact username
+    /// Get user information by username
     GetByName {
-        /// Exact username to look up
+        /// Username (not display name)
         username: String,
         /// Output in JSON format
         #[arg(long)]
         json: bool,
+        /// Show detailed information
+        #[arg(short = 'l', long)]
+        long: bool,
     },
-    /// User notes management
-    #[command(subcommand)]
-    Note(NoteAction),
-    /// List all user notes
+    /// Note actions
+    Note {
+        #[command(subcommand)]
+        action: NoteAction,
+    },
+    /// List all notes
     Notes {
         /// Output in JSON format
         #[arg(long)]
@@ -224,18 +211,18 @@ pub enum UsersAction {
         #[arg(short = 'l', long)]
         long: bool,
     },
-    /// Get user feedback
+    /// Feedback actions
     Feedback {
-        /// User identifier
+        /// User identifier (display name or user ID)
         identifier: String,
-        /// Use direct user ID
+        /// Use direct user ID instead of resolving display name
         #[arg(long)]
         id: bool,
         /// Output in JSON format
         #[arg(long)]
         json: bool,
     },
-    /// Diagnose user access issues (troubleshoot 404 errors)
+    /// Diagnose user access issues
     Diagnose {
         /// User identifier (display name or user ID)
         identifier: String,
@@ -246,35 +233,10 @@ pub enum UsersAction {
 }
 
 #[derive(Subcommand)]
-pub enum NoteAction {
-    /// Get note for a user
-    Get {
-        /// User identifier
-        identifier: String,
-        /// Use direct user ID
-        #[arg(long)]
-        id: bool,
-        /// Output in JSON format
-        #[arg(long)]
-        json: bool,
-    },
-    /// Set/update note for a user
-    Set {
-        /// User identifier
-        identifier: String,
-        /// Note content
-        note: String,
-        /// Use direct user ID
-        #[arg(long)]
-        id: bool,
-    },
-}
-
-#[derive(Subcommand)]
 pub enum WorldsAction {
-    /// Search worlds by name
+    /// Search worlds
     Search {
-        /// Search query (world name)
+        /// Search query
         query: String,
         /// Number of results to return
         #[arg(short = 'n', long, default_value = "20")]
@@ -282,7 +244,7 @@ pub enum WorldsAction {
         /// Offset for pagination
         #[arg(short, long, default_value = "0")]
         offset: i32,
-        /// Filter featured worlds only
+        /// Show only featured worlds
         #[arg(long)]
         featured: bool,
         /// Output in JSON format
@@ -292,12 +254,37 @@ pub enum WorldsAction {
         #[arg(short = 'l', long)]
         long: bool,
     },
-    /// Get world details by ID
+    /// Get world information by ID
     Get {
-        /// World ID (e.g., wrld_12345678-1234-1234-1234-123456789012)
+        /// World ID
         world_id: String,
         /// Output in JSON format
         #[arg(long)]
         json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum NoteAction {
+    /// Get note for a user
+    Get {
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+    },
+    /// Set note for a user
+    Set {
+        /// User identifier (display name or user ID)
+        identifier: String,
+        /// Note text
+        note: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
     },
 }
