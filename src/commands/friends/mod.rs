@@ -1,13 +1,18 @@
+mod add;
+mod display;
 mod fetcher;
-mod handlers;
+mod list;
+mod remove;
+mod show;
 mod sorting;
+mod status;
 mod table_adapter;
 mod utils;
 
 use crate::common::auth_client::AuthenticatedClient;
 use crate::common::display_options::DisplayOptions;
 use anyhow::Result;
-use handlers::ListFilterOptions;
+use list::ListFilterOptions;
 use vrcli::FriendsAction;
 
 pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
@@ -49,21 +54,21 @@ pub async fn handle_friends_command(action: FriendsAction) -> Result<()> {
                 json,
             );
 
-            handlers::handle_list_action(api_config, filter_options, display_options).await
+            list::handle_list_action(api_config, filter_options, display_options).await
         }
         FriendsAction::Get {
             identifier,
             id,
             json,
-        } => handlers::handle_get_action(api_config, &identifier, id, json).await,
+        } => show::handle_show_action(api_config, &identifier, id, json).await,
         FriendsAction::Add { identifier, id } => {
-            handlers::handle_add_action(api_config, &identifier, id).await
+            add::handle_add_action(api_config, &identifier, id).await
         }
         FriendsAction::Remove { identifier, id } => {
-            handlers::handle_remove_action(api_config, &identifier, id).await
+            remove::handle_remove_action(api_config, &identifier, id).await
         }
         FriendsAction::Status { identifier, id } => {
-            handlers::handle_status_action(api_config, &identifier, id).await
+            status::handle_status_action(api_config, &identifier, id).await
         }
     }
 }
