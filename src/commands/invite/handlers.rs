@@ -11,12 +11,9 @@ pub async fn handle_invite_send_action(
     request_invite: bool,
     message_slot: Option<i32>,
 ) -> Result<()> {
-    let user_id = crate::common::user_operations::resolve_user_identifier(
-        api_config,
-        user,
-        use_direct_id,
-    )
-    .await?;
+    let user_id =
+        crate::common::user_operations::resolve_user_identifier(api_config, user, use_direct_id)
+            .await?;
 
     let slot = message_slot.unwrap_or(0);
 
@@ -55,18 +52,20 @@ async fn send_invite_to_instance(
     match apis::invite_api::invite_user(api_config, user_id, invite_request).await {
         Ok(notification) => {
             println!("Invite sent successfully!");
-            
+
             println!("Notification ID: {}", notification.id);
-            
+
             println!("Target Instance: {instance_id}");
-            
+
             if !notification.message.is_empty() {
                 println!("Message: {}", notification.message);
             }
-            
+
             // The details field is a serde_json::Value, so we can inspect it
             if let Some(invite_details) = notification.details.as_object() {
-                if let Some(instance_id_detail) = invite_details.get("instanceId").and_then(|v| v.as_str()) {
+                if let Some(instance_id_detail) =
+                    invite_details.get("instanceId").and_then(|v| v.as_str())
+                {
                     println!("Invite Instance ID: {instance_id_detail}");
                 }
             }
@@ -106,7 +105,7 @@ async fn request_invite_from_user(
 
     // Send the request
     let response = request_builder.send().await?;
-    
+
     let status = response.status();
     let response_text = response.text().await?;
 
@@ -115,11 +114,11 @@ async fn request_invite_from_user(
         match serde_json::from_str::<serde_json::Value>(&response_text) {
             Ok(json_response) => {
                 println!("Invite request sent successfully!");
-                
+
                 if let Some(id) = json_response.get("id").and_then(|v| v.as_str()) {
                     println!("Notification ID: {id}");
                 }
-                
+
                 if let Some(message) = json_response.get("message").and_then(|v| v.as_str()) {
                     if !message.is_empty() {
                         println!("Message: {message}");
