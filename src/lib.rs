@@ -31,6 +31,11 @@ pub enum Commands {
         #[command(subcommand)]
         action: AuthAction,
     },
+    /// Send invites or request invites from friends
+    Invite {
+        #[command(subcommand)]
+        action: InviteAction,
+    },
 }
 
 #[derive(Subcommand)]
@@ -124,26 +129,22 @@ pub enum FriendsAction {
         #[arg(long)]
         id: bool,
     },
-    /// Request an invite from a friend
-    RequestInvite {
+}
+
+#[derive(Subcommand)]
+pub enum InviteAction {
+    /// Send an invite to a friend or request an invite
+    Send {
         /// User identifier (display name or user ID)
-        identifier: String,
+        user: String,
+        /// Instance ID to invite to (optional - if not provided, will request invite)
+        instance_id: Option<String>,
         /// Use direct user ID instead of resolving display name
         #[arg(long)]
         id: bool,
-        /// Message slot (0-7)
-        #[arg(short = 'm', long)]
-        message_slot: Option<i32>,
-    },
-    /// Send an invite to a friend to a specific instance
-    Invite {
-        /// User identifier (display name or user ID)
-        identifier: String,
-        /// Instance ID to invite to
-        instance_id: String,
-        /// Use direct user ID instead of resolving display name
-        #[arg(long)]
-        id: bool,
+        /// Request an invite from the user instead of sending one
+        #[arg(long, conflicts_with = "instance_id")]
+        request_invite: bool,
         /// Message slot (0-7)
         #[arg(short = 'm', long)]
         message_slot: Option<i32>,

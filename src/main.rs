@@ -24,5 +24,6 @@ async fn main() -> Result<()> {
         Commands::Users { action } => commands::users::handle_users_command(action).await,
         Commands::Worlds { action } => commands::worlds::handle_worlds_command(action).await,
         Commands::Auth { action } => commands::auth::handle_auth_command(action).await,
+        Commands::Invite { action } => commands::invite::handle_invite_command(action).await,
     }
 }
