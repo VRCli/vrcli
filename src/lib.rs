@@ -133,21 +133,32 @@ pub enum FriendsAction {
 
 #[derive(Subcommand)]
 pub enum InviteAction {
-    /// Send an invite to a friend or request an invite
+    /// Send an invite to a friend
     Send {
         /// User identifier (display name or user ID)
         user: String,
-        /// Instance ID to invite to (optional - if not provided, will request invite)
-        instance_id: Option<String>,
+        /// Instance ID to invite to
+        instance_id: String,
         /// Use direct user ID instead of resolving display name
         #[arg(long)]
         id: bool,
-        /// Request an invite from the user instead of sending one
-        #[arg(long, conflicts_with = "instance_id")]
-        request_invite: bool,
         /// Message slot (0-7)
         #[arg(short = 'm', long)]
         message_slot: Option<i32>,
+    },
+    /// Request an invite from a friend
+    Request {
+        /// User identifier (display name or user ID)
+        user: String,
+        /// Use direct user ID instead of resolving display name
+        #[arg(long)]
+        id: bool,
+        /// Message slot (0-7)
+        #[arg(short = 'm', long)]
+        message_slot: Option<i32>,
+        /// Force traditional invite request (disable auto location join)
+        #[arg(long)]
+        force_request: bool,
     },
 }
 

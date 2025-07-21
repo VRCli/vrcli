@@ -22,14 +22,20 @@ pub async fn handle_invite_send_action(
             // Send invite to specific instance
             send_invite_to_instance(api_config, &user_id, &instance, slot).await
         }
-        (None, true) | (None, false) => {
-            // Request invite (explicit flag or no instance provided)
+        (None, true) => {
+            // Request invite (only when --request flag is explicitly set)
             request_invite_from_user(api_config, &user_id, slot).await
+        }
+        (None, false) => {
+            // No instance_id and no --request flag provided
+            Err(anyhow::anyhow!(
+                "Must specify either an instance_id or use --request flag to request an invite"
+            ))
         }
         (Some(_), true) => {
             // This should be prevented by clap conflicts_with, but handle gracefully
             Err(anyhow::anyhow!(
-                "Cannot specify both instance_id and --request-invite"
+                "Cannot specify both instance_id and --request flag"
             ))
         }
     }
@@ -112,18 +118,8 @@ async fn request_invite_from_user(
     if status.is_success() {
         // Parse the response as JSON
         match serde_json::from_str::<serde_json::Value>(&response_text) {
-            Ok(json_response) => {
-                println!("Invite request sent successfully!");
-
-                if let Some(id) = json_response.get("id").and_then(|v| v.as_str()) {
-                    println!("Notification ID: {id}");
-                }
-
-                if let Some(message) = json_response.get("message").and_then(|v| v.as_str()) {
-                    if !message.is_empty() {
-                        println!("Message: {message}");
-                    }
-                }
+            Ok(_) => {
+                println!("✅ Successfully requested invite using traditional method!");
             }
             Err(e) => {
                 eprintln!("Failed to parse response JSON: {e}");
@@ -139,3 +135,145 @@ async fn request_invite_from_user(
 
     Ok(())
 }
+
+/// Handle invite request with automatic location detection
+pub async fn handle_invite_request_action(
+    api_config: &vrchatapi::apis::configuration::Configuration,
+    user: &str,
+    use_direct_id: bool,
+    message_slot: Option<i32>,
+    force_request: bool,
+) -> Result<()> {
+    let user_id =
+        crate::common::user_operations::resolve_user_identifier(api_config, user, use_direct_id)
+            .await?;
+
+    let slot = message_slot.unwrap_or(0);
+
+    // Skip auto location detection if force_request is true
+    if force_request {
+        println!("🔄 Using traditional invite request (--force-request specified)");
+        return request_invite_from_user(api_config, &user_id, slot).await;
+    }
+
+    // Fetch user details to check location availability
+    match crate::common::user_operations::fetch_user_by_resolved_id(api_config, &user_id).await {
+        Ok(user_info) => {
+            // Check if user is online and location is available
+            if user_info.status != vrchatapi::models::UserStatus::Offline {
+                if let Some(location) = &user_info.location {
+                    if !location.is_empty() && location != "private" && location.contains(':') {
+                        // Parse location to get world_id and instance_id
+                        let parts: Vec<&str> = location.split(':').collect();
+                        if parts.len() >= 2 {
+                            let world_id = parts[0];
+                            let full_instance_part = parts[1];
+                            
+                            // Extract the base instance ID (before any ~ modifiers)
+                            let instance_id = if let Some(tilde_pos) = full_instance_part.find('~') {
+                                &full_instance_part[..tilde_pos]
+                            } else {
+                                full_instance_part
+                            };
+
+                            // Try to use invite_myself_to API with base instance ID only
+                            println!("🎯 Detected user location, attempting to use automatic invite...");
+                            match invite_myself_to_instance(api_config, world_id, instance_id).await {
+                                Ok(_) => {
+                                    return Ok(());
+                                }
+                                Err(_) => {
+                                    // Second try: Use the complete instance part
+                                    println!("⚠️ First attempt failed, trying with full instance identifier...");
+                                    match invite_myself_to_instance(api_config, world_id, full_instance_part).await {
+                                        Ok(_) => {
+                                            return Ok(());
+                                        }
+                                        Err(_) => {
+                                            println!("⚠️ Automatic invite failed, falling back to traditional invite request...");
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // Invalid location format
+                        }
+                    }
+                }
+            }
+        }
+        Err(_) => {
+            // Fall back to traditional invite request
+        }
+    }
+
+    // Fallback to traditional invite request
+    println!("📞 Using traditional invite request method...");
+    request_invite_from_user(api_config, &user_id, slot).await
+}
+
+/// Invite myself to a specific instance using the VRChat API
+async fn invite_myself_to_instance(
+    api_config: &vrchatapi::apis::configuration::Configuration,
+    world_id: &str,
+    instance_id: &str,
+) -> Result<()> {
+    match apis::invite_api::invite_myself_to(api_config, world_id, instance_id).await {
+        Ok(_) => {
+            println!("✅ Successfully invited yourself using automatic invite!");
+            println!("📍 Target: {world_id}:{instance_id}");
+            Ok(())
+        }
+        Err(e) => {
+            // Enhanced error reporting
+            match &e {
+                vrchatapi::apis::Error::ResponseError(response_content) => {
+                    let status = response_content.status;
+                    let content = &response_content.content;
+                    
+                    match status.as_u16() {
+                        400 => {
+                            Err(anyhow::anyhow!(
+                                "Failed to invite myself to instance: error in response: status code 400 Bad Request\n\
+                                Possible causes:\n\
+                                - Instance is friends-only and you're not friends with the instance creator\n\
+                                - Instance is invite-only\n\
+                                - Instance has reached maximum capacity\n\
+                                - Invalid instance format or world doesn't exist\n\
+                                Response body: {}", content
+                            ))
+                        }
+                        401 => {
+                            Err(anyhow::anyhow!(
+                                "Failed to invite myself to instance: Unauthorized (401)\n\
+                                Please check your authentication credentials."
+                            ))
+                        }
+                        403 => {
+                            Err(anyhow::anyhow!(
+                                "Failed to invite myself to instance: Forbidden (403)\n\
+                                You don't have permission to join this instance."
+                            ))
+                        }
+                        404 => {
+                            Err(anyhow::anyhow!(
+                                "Failed to invite myself to instance: Not Found (404)\n\
+                                The world or instance doesn't exist."
+                            ))
+                        }
+                        _ => {
+                            Err(anyhow::anyhow!(
+                                "Failed to invite myself to instance: HTTP {} - {}\n\
+                                Response body: {}", status, status.canonical_reason().unwrap_or("Unknown"), content
+                            ))
+                        }
+                    }
+                }
+                _ => {
+                    Err(anyhow::anyhow!("Failed to invite myself to instance: {}", e))
+                }
+            }
+        }
+    }
+}
+

@@ -13,16 +13,30 @@ pub async fn handle_invite_command(action: InviteAction) -> Result<()> {
             user,
             instance_id,
             id,
-            request_invite,
             message_slot,
         } => {
             handlers::handle_invite_send_action(
                 api_config,
                 &user,
-                instance_id,
+                Some(instance_id),
                 id,
-                request_invite,
+                false,
                 message_slot,
+            )
+            .await
+        }
+        InviteAction::Request {
+            user,
+            id,
+            message_slot,
+            force_request,
+        } => {
+            handlers::handle_invite_request_action(
+                api_config,
+                &user,
+                id,
+                message_slot,
+                force_request,
             )
             .await
         }
