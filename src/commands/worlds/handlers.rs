@@ -11,7 +11,6 @@ pub struct WorldSearchOptions {
     pub query: String,
     pub limit: i32,
     pub offset: i32,
-    pub featured: bool,
 }
 
 /// Handle the Search action
@@ -25,11 +24,6 @@ pub async fn handle_search_action(
         &search_options.query,
         search_options.limit,
         search_options.offset,
-        if search_options.featured {
-            Some(true)
-        } else {
-            None
-        },
     )
     .await?;
 

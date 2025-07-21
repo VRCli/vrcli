@@ -35,30 +35,37 @@ General syntax:
 vrcli <resource> <action> [options]
 ```
 
-## Commands
+## Commands(Simplified)
 
 ### Authentication
-- `auth login`
-- `auth logout`
-- `auth status`
+- `auth login` - Set authentication credentials
+- `auth logout` - Logout and remove stored credentials
+- `auth status` - Show current authentication status
 
 ### Users
-- `users list`
-- `users get <username>`
-- `users diagnose <username>`
-
+- `users search <query>` - Search users by display name
+- `users get <identifier>` - Get user information by ID or display name
+  
 ### Friends
-- `friends list`
-- `friends add <username>`
-- `friends remove <username>`
+- `friends list` - List all friends with various filtering and sorting options
+- `friends get <identifier>` - Get friend details by username
+- `friends add <identifier>` - Send a friend request to a user
+- `friends remove <identifier>` - Remove a friend or cancel outgoing friend request
+- `friends status <identifier>` - Check friend status with a user
+
+### Invites
+- `invite send <user> <instance_id>` - Send an invite to a friend
+- `invite request <user>` - Request an invite from a friend
 
 ### Worlds
-- `worlds search <query> [--featured]`
-- `worlds get <world_id> [--json]`
+- `worlds search <query>` - Search worlds
+- `worlds get <world_id>` - Get world information by ID
 
-### Configuration
-- `config view`
-- `config set <key> <value>`
+### Common Options
+Most commands support:
+- `--id` - Use direct user ID instead of resolving display name
+- `--json` - Output in JSON format
+- `--long` / `-l` - Show detailed information
 
 ## Development
 

@@ -7,11 +7,10 @@ pub async fn search_worlds(
     query: &str,
     limit: i32,
     offset: i32,
-    featured: Option<bool>,
 ) -> Result<Vec<vrchatapi::models::LimitedWorld>> {
     let worlds = worlds_api::search_worlds(
         api_config,
-        featured,
+        None, // featured
         None, // sort
         None, // user
         None, // user_id

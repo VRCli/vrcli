@@ -61,6 +61,15 @@ impl Config {
         fs::write(&config_path, config_content)?;
         Ok(())
     }
+
+    /// Delete the configuration file
+    pub fn delete() -> Result<()> {
+        let config_path = get_config_path()?;
+        if config_path.exists() {
+            fs::remove_file(&config_path)?;
+        }
+        Ok(())
+    }
 }
 
 fn get_config_path() -> Result<PathBuf> {

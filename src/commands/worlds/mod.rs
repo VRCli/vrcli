@@ -17,7 +17,6 @@ pub async fn handle_worlds_command(action: WorldsAction) -> Result<()> {
             query,
             limit,
             offset,
-            featured,
             json,
             long,
         } => {
@@ -25,7 +24,6 @@ pub async fn handle_worlds_command(action: WorldsAction) -> Result<()> {
                 query: query.clone(),
                 limit,
                 offset,
-                featured,
             };
 
             let display_options = DisplayOptions::from_flags(

@@ -44,6 +44,8 @@ pub enum AuthAction {
     Login,
     /// Show current authentication status
     Status,
+    /// Logout and remove stored credentials
+    Logout,
 }
 
 #[derive(Subcommand)]
@@ -256,9 +258,6 @@ pub enum WorldsAction {
         /// Offset for pagination
         #[arg(short, long, default_value = "0")]
         offset: i32,
-        /// Show only featured worlds
-        #[arg(long)]
-        featured: bool,
         /// Output in JSON format
         #[arg(long)]
         json: bool,
