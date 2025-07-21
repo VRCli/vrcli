@@ -36,6 +36,26 @@ pub async fn fetch_world_by_id(
     api_config: &vrchatapi::apis::configuration::Configuration,
     world_id: &str,
 ) -> Result<vrchatapi::models::World> {
-    let world = worlds_api::get_world(api_config, world_id).await?;
+    let world = worlds_api::get_world(api_config, world_id)
+        .await
+        .map_err(|e| {
+            // Convert API errors to more user-friendly messages
+            match e {
+                vrchatapi::apis::Error::ResponseError(ref response_content) => {
+                    if response_content.status == 404 {
+                        return anyhow::anyhow!("No world found with ID '{}'", world_id);
+                    }
+                    anyhow::anyhow!(
+                        "Failed to fetch world '{}' - HTTP {}",
+                        world_id,
+                        response_content.status
+                    )
+                }
+                _ => {
+                    // For other errors, provide a more general but clear message
+                    anyhow::anyhow!("Failed to fetch world '{}' - {}", world_id, e)
+                }
+            }
+        })?;
     Ok(world)
 }
