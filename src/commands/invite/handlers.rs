@@ -168,24 +168,34 @@ pub async fn handle_invite_request_action(
                         if parts.len() >= 2 {
                             let world_id = parts[0];
                             let full_instance_part = parts[1];
-                            
+
                             // Extract the base instance ID (before any ~ modifiers)
-                            let instance_id = if let Some(tilde_pos) = full_instance_part.find('~') {
+                            let instance_id = if let Some(tilde_pos) = full_instance_part.find('~')
+                            {
                                 &full_instance_part[..tilde_pos]
                             } else {
                                 full_instance_part
                             };
 
                             // Try to use invite_myself_to API with base instance ID only
-                            println!("🎯 Detected user location, attempting to use automatic invite...");
-                            match invite_myself_to_instance(api_config, world_id, instance_id).await {
+                            println!(
+                                "🎯 Detected user location, attempting to use automatic invite..."
+                            );
+                            match invite_myself_to_instance(api_config, world_id, instance_id).await
+                            {
                                 Ok(_) => {
                                     return Ok(());
                                 }
                                 Err(_) => {
                                     // Second try: Use the complete instance part
                                     println!("⚠️ First attempt failed, trying with full instance identifier...");
-                                    match invite_myself_to_instance(api_config, world_id, full_instance_part).await {
+                                    match invite_myself_to_instance(
+                                        api_config,
+                                        world_id,
+                                        full_instance_part,
+                                    )
+                                    .await
+                                    {
                                         Ok(_) => {
                                             return Ok(());
                                         }
@@ -230,7 +240,7 @@ async fn invite_myself_to_instance(
                 vrchatapi::apis::Error::ResponseError(response_content) => {
                     let status = response_content.status;
                     let content = &response_content.content;
-                    
+
                     match status.as_u16() {
                         400 => {
                             Err(anyhow::anyhow!(
@@ -269,11 +279,11 @@ async fn invite_myself_to_instance(
                         }
                     }
                 }
-                _ => {
-                    Err(anyhow::anyhow!("Failed to invite myself to instance: {}", e))
-                }
+                _ => Err(anyhow::anyhow!(
+                    "Failed to invite myself to instance: {}",
+                    e
+                )),
             }
         }
     }
 }
-
