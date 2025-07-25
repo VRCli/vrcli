@@ -11,10 +11,20 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Authentication management
+    Auth {
+        #[command(subcommand)]
+        action: AuthAction,
+    },
     /// Manage friends
     Friends {
         #[command(subcommand)]
         action: FriendsAction,
+    },
+    /// Send or request invites from friends
+    Invite {
+        #[command(subcommand)]
+        action: InviteAction,
     },
     /// Manage users
     Users {
@@ -25,16 +35,6 @@ pub enum Commands {
     Worlds {
         #[command(subcommand)]
         action: WorldsAction,
-    },
-    /// Authentication management
-    Auth {
-        #[command(subcommand)]
-        action: AuthAction,
-    },
-    /// Send invites or request invites from friends
-    Invite {
-        #[command(subcommand)]
-        action: InviteAction,
     },
 }
 
