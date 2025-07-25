@@ -126,10 +126,12 @@ impl AuthenticatedClient {
                 "authenticated": false
             })
         };
-        
+
         match serde_json::to_string_pretty(&status) {
             Ok(json_str) => println!("{json_str}"),
-            Err(_) => println!(r#"{{"authenticated": false, "error": "Failed to serialize JSON"}}"#)
+            Err(_) => {
+                println!(r#"{{"authenticated": false, "error": "Failed to serialize JSON"}}"#)
+            }
         }
     }
 }

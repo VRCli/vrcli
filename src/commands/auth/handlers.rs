@@ -39,7 +39,9 @@ async fn handle_status_action(json: bool) -> Result<()> {
                         });
                         match serde_json::to_string_pretty(&error_response) {
                             Ok(json_str) => println!("{json_str}"),
-                            Err(_) => println!(r#"{{"authenticated": false, "error": "JSON serialization failed"}}"#)
+                            Err(_) => println!(
+                                r#"{{"authenticated": false, "error": "JSON serialization failed"}}"#
+                            ),
                         }
                     } else {
                         let error_msg = format!("{e}");
@@ -47,7 +49,9 @@ async fn handle_status_action(json: bool) -> Result<()> {
                             || error_msg.contains("Password authentication failed")
                         {
                             println!("❌ Authentication failed: {e}");
-                            println!("Please run 'vrcli auth login' to refresh your authentication");
+                            println!(
+                                "Please run 'vrcli auth login' to refresh your authentication"
+                            );
                         } else {
                             println!("❌ Error checking authentication status: {e}");
                         }
@@ -63,7 +67,9 @@ async fn handle_status_action(json: bool) -> Result<()> {
                 });
                 match serde_json::to_string_pretty(&error_response) {
                     Ok(json_str) => println!("{json_str}"),
-                    Err(_) => println!(r#"{{"authenticated": false, "error": "JSON serialization failed"}}"#)
+                    Err(_) => println!(
+                        r#"{{"authenticated": false, "error": "JSON serialization failed"}}"#
+                    ),
                 }
             } else {
                 println!("❌ Not authenticated: {e}");
