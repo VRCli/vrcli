@@ -26,6 +26,64 @@ pub async fn login_interactive() -> Result<()> {
     }
 }
 
+/// Login with provided cookie value directly
+pub async fn login_with_cookie_value(cookie_value: &str) -> Result<()> {
+    // Normalize and validate cookie
+    let auth_cookie = utils::normalize_cookie_value(cookie_value);
+    utils::validate_auth_cookie(&auth_cookie)?;
+
+    println!("Verifying cookie...");
+
+    // Create client with cookie
+    let jar = Arc::new(reqwest::cookie::Jar::default());
+    let cookie_header = format!("auth={auth_cookie}");
+
+    jar.set_cookies(
+        &mut [HeaderValue::from_str(&cookie_header)
+            .map_err(|e| anyhow::anyhow!("Invalid cookie format: {}", e))?]
+        .iter(),
+        &Url::from_str("https://api.vrchat.cloud")
+            .map_err(|e| anyhow::anyhow!("URL parse error: {}", e))?,
+    );
+
+    let client = reqwest::Client::builder()
+        .cookie_provider(jar)
+        .build()
+        .unwrap();
+
+    let config = apis::configuration::Configuration {
+        client,
+        user_agent: Some(String::from("vrcli/0.1.0")),
+        ..Default::default()
+    };
+
+    // Attempt cookie authentication
+    match apis::authentication_api::get_current_user(&config).await {
+        Ok(response) => match response {
+            EitherUserOrTwoFactor::CurrentUser(user) => {
+                handle_successful_login(&user.display_name, "", "", Some(&auth_cookie), None)
+                    .await?;
+            }
+            EitherUserOrTwoFactor::RequiresTwoFactorAuth(_) => {
+                return Err(anyhow::anyhow!(
+                    "Cookie authentication failed - 2FA required but not properly configured"
+                ));
+            }
+        },
+        Err(e) => {
+            let error_msg = format!("{e}");
+            if error_msg.contains("401") || error_msg.contains("Unauthorized") {
+                utils::print_cookie_auth_help();
+                return Err(anyhow::anyhow!("Cookie authentication failed"));
+            } else {
+                return Err(anyhow::anyhow!("Cookie authentication failed: {}", e));
+            }
+        }
+    }
+
+    Ok(())
+}
+
 /// Login with username and password
 pub async fn login_with_password() -> Result<()> {
     let username: String = Text::new("Username").prompt()?;

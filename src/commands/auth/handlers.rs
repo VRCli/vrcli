@@ -7,15 +7,18 @@ use vrcli::AuthAction;
 /// Handle authentication commands
 pub async fn handle_auth_command(action: AuthAction) -> Result<()> {
     match action {
-        AuthAction::Login => handle_login_action().await,
+        AuthAction::Login { cookie } => handle_login_action(cookie).await,
         AuthAction::Status { json } => handle_status_action(json).await,
         AuthAction::Logout => handle_logout_action().await,
     }
 }
 
 /// Handle login action
-async fn handle_login_action() -> Result<()> {
-    login::login_interactive().await
+async fn handle_login_action(cookie: Option<String>) -> Result<()> {
+    match cookie {
+        Some(cookie_value) => login::login_with_cookie_value(&cookie_value).await,
+        None => login::login_interactive().await,
+    }
 }
 
 /// Handle status action

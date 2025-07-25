@@ -41,7 +41,11 @@ pub enum Commands {
 #[derive(Subcommand)]
 pub enum AuthAction {
     /// Set authentication credentials
-    Login,
+    Login {
+        /// Authenticate using a cookie value directly
+        #[arg(long)]
+        cookie: Option<String>,
+    },
     /// Logout and remove stored credentials
     Logout,
     /// Show current authentication status
