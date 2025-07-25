@@ -17,7 +17,7 @@ pub struct WorldTableItem {
     pub favorites: i32,
     pub created_at: String,
     pub updated_at: String,
-    pub occupants: Option<i32>,        // Total current players
+    pub occupants: Option<i32>,         // Total current players
     pub private_occupants: Option<i32>, // Current players in private instances
     pub public_occupants: Option<i32>,  // Current players in public instances
 }
@@ -127,22 +127,28 @@ impl TableDisplayable for WorldTableItem {
                 "tags".to_string(),
                 Value::Array(self.tags.iter().map(|t| Value::String(t.clone())).collect()),
             );
-            
+
             // Add current player counts
             if let Some(occupants) = self.occupants {
                 map.insert("occupants".to_string(), Value::Number(occupants.into()));
             } else {
                 map.insert("occupants".to_string(), Value::Null);
             }
-            
+
             if let Some(public_occupants) = self.public_occupants {
-                map.insert("public_occupants".to_string(), Value::Number(public_occupants.into()));
+                map.insert(
+                    "public_occupants".to_string(),
+                    Value::Number(public_occupants.into()),
+                );
             } else {
                 map.insert("public_occupants".to_string(), Value::Null);
             }
-            
+
             if let Some(private_occupants) = self.private_occupants {
-                map.insert("private_occupants".to_string(), Value::Number(private_occupants.into()));
+                map.insert(
+                    "private_occupants".to_string(),
+                    Value::Number(private_occupants.into()),
+                );
             } else {
                 map.insert("private_occupants".to_string(), Value::Null);
             }

@@ -66,9 +66,11 @@ pub async fn handle_get_action(
     // Display current player counts if available
     if let Some(occupants) = world_item.occupants {
         println!("Current Players: {occupants}");
-        
+
         // Show breakdown if available
-        if let (Some(public), Some(private)) = (world_item.public_occupants, world_item.private_occupants) {
+        if let (Some(public), Some(private)) =
+            (world_item.public_occupants, world_item.private_occupants)
+        {
             println!("  Public: {public}");
             println!("  Private: {private}");
         }
