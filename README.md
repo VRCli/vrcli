@@ -12,6 +12,12 @@
 
 A Rust CLI for VRChat: check friends, see who’s online, and send invites in one command.
 
+## Why vrcli?
+
+Sometimes you only want a quick answer: “Who’s online?”, “What’s that user’s ID?” without
+waiting for the sluggish VRChat website or firing up a memory-hungry GUI client.  
+`vrcli` lets you grab that information straight from your shell in a fraction of the time.
+
 ## Installation
 
 Make sure you have Rust installed (I developed this with version 1.70+, you can get the toolchain from [rustup.rs](https://rustup.rs/)).
