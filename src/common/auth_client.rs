@@ -112,4 +112,24 @@ impl AuthenticatedClient {
             println!("❌ Authentication Status: Not authenticated");
         }
     }
+
+    /// Display authentication status in JSON format
+    pub fn display_auth_status_json(&self) {
+        let status = if let Some(user) = &self.current_user {
+            serde_json::json!({
+                "authenticated": true,
+                "user_id": user.id,
+                "display_name": user.display_name
+            })
+        } else {
+            serde_json::json!({
+                "authenticated": false
+            })
+        };
+        
+        match serde_json::to_string_pretty(&status) {
+            Ok(json_str) => println!("{json_str}"),
+            Err(_) => println!(r#"{{"authenticated": false, "error": "Failed to serialize JSON"}}"#)
+        }
+    }
 }

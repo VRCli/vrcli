@@ -42,10 +42,14 @@ pub enum Commands {
 pub enum AuthAction {
     /// Set authentication credentials
     Login,
-    /// Show current authentication status
-    Status,
     /// Logout and remove stored credentials
     Logout,
+    /// Show current authentication status
+    Status {
+        /// Output in JSON format
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
