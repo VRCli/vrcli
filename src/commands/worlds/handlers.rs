@@ -63,6 +63,19 @@ pub async fn handle_get_action(
     );
     println!("Capacity: {}", world_item.capacity);
 
+    // Display current player counts if available
+    if let Some(occupants) = world_item.occupants {
+        println!("Current Players: {occupants}");
+        
+        // Show breakdown if available
+        if let (Some(public), Some(private)) = (world_item.public_occupants, world_item.private_occupants) {
+            println!("  Public: {public}");
+            println!("  Private: {private}");
+        }
+    } else {
+        println!("Current Players: N/A (authentication required)");
+    }
+
     if !world_item.description.is_empty() && world_item.description != "N/A" {
         println!("Description: {}", world_item.description);
     }

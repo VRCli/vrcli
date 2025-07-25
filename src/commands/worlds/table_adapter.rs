@@ -17,6 +17,9 @@ pub struct WorldTableItem {
     pub favorites: i32,
     pub created_at: String,
     pub updated_at: String,
+    pub occupants: Option<i32>,        // Total current players
+    pub private_occupants: Option<i32>, // Current players in private instances
+    pub public_occupants: Option<i32>,  // Current players in public instances
 }
 
 impl TableDisplayable for WorldTableItem {
@@ -124,6 +127,25 @@ impl TableDisplayable for WorldTableItem {
                 "tags".to_string(),
                 Value::Array(self.tags.iter().map(|t| Value::String(t.clone())).collect()),
             );
+            
+            // Add current player counts
+            if let Some(occupants) = self.occupants {
+                map.insert("occupants".to_string(), Value::Number(occupants.into()));
+            } else {
+                map.insert("occupants".to_string(), Value::Null);
+            }
+            
+            if let Some(public_occupants) = self.public_occupants {
+                map.insert("public_occupants".to_string(), Value::Number(public_occupants.into()));
+            } else {
+                map.insert("public_occupants".to_string(), Value::Null);
+            }
+            
+            if let Some(private_occupants) = self.private_occupants {
+                map.insert("private_occupants".to_string(), Value::Number(private_occupants.into()));
+            } else {
+                map.insert("private_occupants".to_string(), Value::Null);
+            }
         } else {
             if options.show_id {
                 map.insert("id".to_string(), Value::String(self.id.clone()));
@@ -187,6 +209,9 @@ impl From<vrchatapi::models::LimitedWorld> for WorldTableItem {
             favorites: world.favorites,
             created_at: world.created_at,
             updated_at: world.updated_at,
+            occupants: None, // LimitedWorld doesn't have occupant data
+            private_occupants: None,
+            public_occupants: None,
         }
     }
 }
@@ -207,6 +232,9 @@ impl From<vrchatapi::models::World> for WorldTableItem {
             favorites: world.favorites.unwrap_or(0),
             created_at: world.created_at,
             updated_at: world.updated_at,
+            occupants: world.occupants,
+            private_occupants: world.private_occupants,
+            public_occupants: world.public_occupants,
         }
     }
 }
