@@ -23,7 +23,4 @@ jobs:
       run: cargo install cargo-audit
     
     - name: Run cargo audit
-      run: cargo audit
-    
-    - name: Run cargo audit for dependencies
-      run: cargo audit --db advisories-db
+      run: cargo audit --deny unsound --deny yanked
