@@ -19,7 +19,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
     
     - name: Install cargo-edit
-      run: cargo install cargo-edit --force --version "^0.12"
+      run: cargo install cargo-edit --force --version "^0.13"
     
     - name: Update dependencies
       run: |
