@@ -24,7 +24,7 @@ jobs:
     - name: Update dependencies
       run: |
         cargo update
-        cargo upgrade --workspace
+        cargo upgrade
     
     - name: Check if changes were made
       id: verify-changed-files
